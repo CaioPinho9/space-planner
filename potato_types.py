@@ -2,7 +2,8 @@ import pickle
 from abc import ABC, abstractmethod
 from copy import deepcopy
 
-from predict import predict_from_csv
+from predictor import Predictor
+
 
 class Thing(ABC):
     def __init__(self, name, cost, quantity, multiplier):
@@ -12,7 +13,6 @@ class Thing(ABC):
 
         self._multiplier = multiplier
         self._quantity = quantity
-
 
     @abstractmethod
     def buy(self):
@@ -33,14 +33,14 @@ class Thing(ABC):
 
 class PotatoType(Thing):
     def __init__(self, name, power_output, quantity=0):
-        super().__init__(name, predict_from_csv(quantity + 1, name), quantity, 1)
+        super().__init__(name, Predictor.predict_thing_cost(quantity + 1, name), quantity, 1)
         self.base_power_output = power_output
         self.power_output = self.base_power_output
         self._efficiency = self.current_cost / self.power_output
 
     def buy(self):
         self._quantity += 1
-        self.current_cost = predict_from_csv(self._quantity + 1, self.name)
+        self.current_cost = Predictor.predict_thing_cost(self._quantity + 1, self.name)
         self._efficiency = self.current_cost / self.power_output
 
     @property
@@ -92,6 +92,7 @@ class Upgrade(Thing):
     @property
     def buyable(self):
         return not self._quantity
+
 
 class ThingMaker:
     start_income = None

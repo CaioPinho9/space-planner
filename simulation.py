@@ -4,7 +4,8 @@ from random import choices
 
 import pandas as pd
 
-from PotatoTypes import ThingMaker
+from potato_types import ThingMaker
+
 
 # 27s buff
 # day 3:11min night 25s 3:36total
@@ -23,6 +24,7 @@ def calculate_normalized_efficiencies(upgrades, current_income, time_steps):
 
         normalized_efficiencies.append(efficiency)
     return normalized_efficiencies
+
 
 def run_simulation(simulation_config):
     time_steps = simulation_config["time_steps"]
@@ -82,6 +84,7 @@ def run_simulation(simulation_config):
 
     simulation_config["total_income"] += income_per_second
     print_simulation_results(simulation_config, income_per_second)
+
 
 def print_simulation_results(simulation_config, income_per_second):
     best_income = simulation_config['best_income']

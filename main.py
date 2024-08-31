@@ -2,11 +2,8 @@ from datetime import datetime
 
 import pandas as pd
 
-from PotatoTypes import ThingMaker
-from predict import generate_exponentials
+from potato_types import ThingMaker
 from simulation import run_simulation
-
-# generate_exponentials()
 
 # Simulation parameters
 simulation_times = 200000  # number of times to run the simulation
