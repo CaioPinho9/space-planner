@@ -16,6 +16,8 @@ class Simulation:
     def __init__(self):
         self.running_simulation = False
         self.thread = None
+        self.best_log = None
+        self.configuration = None
 
     @classmethod
     def __calculate_normalized_efficiencies(cls, upgrades, current_income, time_steps):
@@ -37,8 +39,10 @@ class Simulation:
         if self.running_simulation:
             return False
 
+        simulation_config["simulation_index"] = 0
+        self.configuration = simulation_config
         self.running_simulation = True
-        self.thread = threading.Thread(target=self.run_simulation, args=(simulation_config,))
+        self.thread = threading.Thread(target=self.run_simulation)
         self.thread.start()
         return True
 
@@ -46,12 +50,11 @@ class Simulation:
         self.running_simulation = False
         self.thread.join()
 
-    def run_simulation(self, simulation_config):
-        simulation_config["simulation_index"] = 0
+    def run_simulation(self):
         while self.running_simulation:
-            time_steps = simulation_config["time_steps"]
-            simulation_index = simulation_config["simulation_index"]
-            income_per_second = simulation_config["start_income"]
+            time_steps = self.configuration["time_steps"]
+            simulation_index = self.configuration["simulation_index"]
+            income_per_second = self.configuration["start_income"]
             current_log = pd.DataFrame(columns=["Index", "Time", "Income per Second", "Selected Object", "Cost"])
             upgrades = ThingMaker.reset_buyable_stuff()
             current_w = 0
@@ -95,25 +98,25 @@ class Simulation:
                                 "Cost": cost,
                                 "Quantity": quantity
                             }])], ignore_index=True)
-            if income_per_second > simulation_config["best_income"]:
-                simulation_config['best_income'] = income_per_second
-                simulation_config['best_index'] = simulation_index
-                simulation_config['best_log'] = current_log
-                current_log.to_csv("best_log.csv", index=False)
 
-                ThingMaker.save_thing_maker(income_per_second)
-            simulation_config["total_income"] += income_per_second
-            simulation_config["simulation_index"] += 1
-            self.print_simulation_results(simulation_config, income_per_second)
+            if income_per_second > self.configuration["best_income"]:
+                self.configuration['best_income'] = income_per_second
+                self.configuration['best_index'] = simulation_index
+                self.configuration['best_log'] = current_log
+                self.best_log = current_log
 
-    def print_simulation_results(self, simulation_config, income_per_second):
-        best_income = simulation_config['best_income']
-        best_index = simulation_config['best_index']
-        total_income = simulation_config['total_income']
-        simulation_index = simulation_config['simulation_index']
-        simulation_times = simulation_config['simulation_times']
+            self.configuration["total_income"] += income_per_second
+            self.configuration["simulation_index"] += 1
+            self.print_simulation_results(income_per_second)
 
-        start_time = simulation_config['start_time']
+    def print_simulation_results(self, income_per_second):
+        best_income = self.configuration['best_income']
+        best_index = self.configuration['best_index']
+        total_income = self.configuration['total_income']
+        simulation_index = self.configuration['simulation_index']
+        simulation_times = self.configuration['simulation_times']
+
+        start_time = self.configuration['start_time']
         elapsed_time = datetime.now() - start_time
 
         print(f"\rSimulation {simulation_index} completed with income per second: {income_per_second:.0f}", end=' | ')
@@ -122,3 +125,7 @@ class Simulation:
         print(f"Time remaining: {elapsed_time / (simulation_index + 1) * (simulation_times - simulation_index)}", end=' | ')
         print(f"Simulations per second: {(simulation_index + 1) / elapsed_time.total_seconds():.2f}", end=' | ')
         print(f"Average income: {total_income / (simulation_index + 1):.2f}", end='')
+
+    def save_simulation(self):
+        self.best_log.to_csv("best_log.csv", index=False)
+        ThingMaker.save_thing_maker(self.configuration["best_income"])
