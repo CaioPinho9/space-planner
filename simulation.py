@@ -6,7 +6,8 @@ import pandas as pd
 
 from PotatoTypes import ThingMaker
 
-# 27s buff
+# 27s buff probetato
+# 20s potato plant to activate
 # day 3:11min night 25s 3:36total
 
 def calculate_normalized_efficiencies(upgrades, current_income, time_steps):
@@ -30,7 +31,7 @@ def run_simulation(simulation_config):
     simulation_index = simulation_config["simulation_index"]
     income_per_second = simulation_config["start_income"]
 
-    current_log = pd.DataFrame(columns=["Index", "Time", "Income per Second", "Selected Object", "Cost"])
+    current_log = pd.DataFrame(columns=["Index", "Time", "Income per Second", "Thing", "Cost", "Quantity"])
     upgrades = ThingMaker.reset_buyable_stuff()
 
     current_w = 0
@@ -54,7 +55,9 @@ def run_simulation(simulation_config):
         if selected_obj.current_cost <= current_w:
             last_bought = False
             if selected_obj.buyable:
-                current_w -= selected_obj.current_cost
+                quantity = selected_obj.quantity
+                cost = selected_obj.current_cost
+                current_w -= cost
                 last_bought = True
 
                 income_per_second += selected_obj.power_output
@@ -69,7 +72,8 @@ def run_simulation(simulation_config):
                         "Time": t,
                         "Income per Second": income_per_second,
                         "Thing": selected_obj.name,
-                        "Cost": selected_obj.current_cost
+                        "Cost": cost,
+                        "Quantity": quantity
                     }])], ignore_index=True)
 
     if income_per_second > simulation_config["best_income"]:

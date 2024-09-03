@@ -12,16 +12,17 @@ from simulation import run_simulation
 simulation_times = 200000  # number of times to run the simulation
 time_steps = 1800  # number of seconds to simulate
 
-best_log = pd.DataFrame(columns=["Index", "Time", "Income per Second", "Selected Object", "Cost"])
-best_income = 1011
+best_log = pd.DataFrame(columns=["Index", "Time", "Income per Second", "Thing", "Cost", "Quantity"])
+best_income = 91
 best_index = -1
 from_pickle = False
 
 total_income = 0
+start_income = 32.5
 
 ThingMaker.load_thing_maker(from_pickle)
 
-start_income = ThingMaker.start_income if from_pickle else 52
+start_income = ThingMaker.start_income if from_pickle else start_income
 
 simulation_config = {
     "time_steps": time_steps,

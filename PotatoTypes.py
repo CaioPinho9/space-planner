@@ -103,20 +103,23 @@ class ThingMaker:
     @classmethod
     def create_things(cls):
         cls._things = [
-            PotatoType("SolarPanel", power_output=0.1, quantity=17),
-            PotatoType("Potato", power_output=1.0, quantity=5),
-            PotatoType("Probetato", power_output=8.0, quantity=5),
-            PotatoType("Spudnik", power_output=42.0, quantity=1),
+            PotatoType("SolarPanel", power_output=0.0885, quantity=15),
+            PotatoType("Potato", power_output=1.0, quantity=4),
+            PotatoType("Probetato", power_output=8.0, quantity=7),
+            PotatoType("Spudnik", power_output=42.0, quantity=0),
             PotatoType("PotatoPlant", power_output=230, quantity=0),
         ]
 
         cls._upgrades = [
-            Upgrade("EnhancedSolar", target="SolarPanel", multiplier=0.3 / 0.1, cost=1000, quantity=1),
-            Upgrade("SolarAmbience", target="SolarPanel", multiplier=0.5 / 0.3, cost=2600),
+            Upgrade("CleanSolarPanels", target="SolarPanel", multiplier=0.3 / 0.1, cost=1000, quantity=1),
+            Upgrade("SolarAmbience", target="SolarPanel", multiplier=0.0942 / 0.0885, cost=2600),
             Upgrade("MarisPipers", target="Potato", multiplier=2, cost=8000),
-            Upgrade("MrSheen", target="SolarPanel", multiplier=1 / 0.3, cost=15000),
+            Upgrade("PolishedSolarPanels", target="SolarPanel", multiplier=1 / 0.3, cost=15000),
+            Upgrade("MarisPeers", target="Potato", multiplier=2, cost=160000),
             Upgrade("ProbetatoRoots", target="Probetato", multiplier=4, cost=180000),
+            Upgrade("GoldenSolarPanels", target="SolarPanel", multiplier=4, cost=500000),
             Upgrade("GoldenSpudnikFoil", target="Spudnik", multiplier=2, cost=600000),
+            Upgrade("ProbetatoPlanters", target="Probetato", multiplier=2, cost=1800000),
         ]
 
         cls._things.extend(cls._upgrades)
