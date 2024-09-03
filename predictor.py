@@ -35,15 +35,15 @@ class Predictor:
                     print(f"Warning: x and y have different lengths for column {column}: x_length={len(x_values_filtered)}, y_length={len(y_values)}")
                     continue  # Skip this column if lengths mismatch
 
-                    plt.figure(figsize=(14, 8))
-                    plt.scatter(x_values_filtered, y_values, label=f'Original {column}')
-                    plt.plot(x_values_filtered, output_data[f'{column} Fitted y'][:len(x_values_filtered)], label=f'Fitted {column}')
-                    plt.xlabel('x')
-                    plt.ylabel('y')
-                    plt.title('Exponential Fit to Data')
-                    plt.legend()
-                    plt.grid(True)
-                    plt.show()
+                plt.figure(figsize=(14, 8))
+                plt.scatter(x_values_filtered, y_values, label=f'Original {column}')
+                plt.plot(x_values_filtered, output_data[f'{column} Fitted y'][:len(x_values_filtered)], label=f'Fitted {column}')
+                plt.xlabel('x')
+                plt.ylabel('y')
+                plt.title('Exponential Fit to Data')
+                plt.legend()
+                plt.grid(True)
+                plt.show()
 
     # Fit the exponential model and return the fitted values
     @classmethod
@@ -77,7 +77,7 @@ class Predictor:
         # Process each column
         for column in df.columns:
             # And has more than 1 non nan value
-            if column != 'x' and sum(~np.isnan(df[column])) > 1:
+            if column != 'x':
                 y_values = df[column].values
 
                 mask = ~np.isnan(y_values)
@@ -88,7 +88,11 @@ class Predictor:
                     continue  # Skip columns with no valid values
 
                 # Fit the curve
-                y_fitted, a, b = cls.__fit_exponential_curve(x_values_filtered, y_values)
+                if sum(~np.isnan(df[column])) > 1:
+                    y_fitted, a, b = cls.__fit_exponential_curve(x_values_filtered, y_values)
+                else:
+                    a = y_values[0] * 0.85
+                    y_fitted = y_values
 
                 # Add fitted values to the output data
                 output_data[f'{column} Original y'] = y_values
@@ -137,4 +141,4 @@ class Predictor:
 
 
 if __name__ == '__main__':
-    Predictor.generate_parameters()
+    Predictor.generate_parameters(plot=True)

@@ -137,15 +137,19 @@ class ThingMaker:
             pickle.dump(save, f)
 
     @classmethod
-    def load_thing_maker(cls, from_pickler):
-        if from_pickler:
-            with open('things.pkl', 'rb') as f:
-                cls._things, cls.start_income = pickle.load(f)
-        else:
-            cls.create_things()
-            for upgrade in cls._things:
-                if not upgrade.buyable:
-                    upgrade.buy()
+    def load_thing_maker(cls, from_pickle):
+        if from_pickle:
+            try:
+                with open('things.pkl', 'rb') as f:
+                    cls._things, cls.start_income = pickle.load(f)
+                    return
+            except FileNotFoundError:
+                pass
+
+        cls.create_things()
+        for upgrade in cls._things:
+            if not upgrade.buyable:
+                upgrade.buy()
 
         cls._things = [thing for thing in cls._things if thing.buyable]
         cls.reset_buyable_stuff()

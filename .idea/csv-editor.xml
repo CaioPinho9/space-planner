@@ -10,21 +10,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/copybest_log.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="/fitted_parameters.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/real_values.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

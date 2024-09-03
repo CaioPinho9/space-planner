@@ -34,11 +34,12 @@ class Simulation:
 
     def start_simulation(self, simulation_config):
         if self.running_simulation:
-            return
+            return False
 
         self.running_simulation = True
         self.thread = threading.Thread(target=self.run_simulation, args=(simulation_config,))
         self.thread.start()
+        return True
 
     def end_simulation(self):
         self.running_simulation = False
