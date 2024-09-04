@@ -78,7 +78,7 @@ class Upgrade(Thing):
         self._target_obj = None
 
     def _find_target(self):
-        for thing in ThingMaker.buyable_stuff:
+        for thing in ThingMaker.simulation_things:
             if thing.name == self._target:
                 return thing
 
@@ -115,7 +115,7 @@ class ThingMaker:
 
     _things = []
     _upgrades = []
-    buyable_stuff = []
+    simulation_things = []
 
     @classmethod
     def create_things(cls):
@@ -141,18 +141,18 @@ class ThingMaker:
 
         cls._things.extend(cls._upgrades)
 
-        cls.buyable_stuff = cls._things
+        cls.simulation_things = cls._things
 
     @classmethod
-    def reset_buyable_stuff(cls):
-        cls.buyable_stuff = deepcopy(cls._things)
+    def reset_simulation_things(cls):
+        cls.simulation_things = deepcopy(cls._things)
 
-        return cls.buyable_stuff
+        return cls.simulation_things
 
     @classmethod
     def save_thing_maker(cls, income):
         things_json = {}
-        for thing in cls.buyable_stuff:
+        for thing in cls.simulation_things:
             things_json.update(thing.serialize())
 
         things_json['start_income'] = income
@@ -176,4 +176,4 @@ class ThingMaker:
 
         cls._things = [thing for thing in cls._things if thing.buyable]
 
-        cls.reset_buyable_stuff()
+        cls.reset_simulation_things()

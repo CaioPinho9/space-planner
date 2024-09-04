@@ -28,10 +28,9 @@ def start_simulation():
         "best_index": simulation_config.get("best_index", -1),
         "best_income": simulation_config.get("best_income", 1011),
         "log": simulation_config.get("log", True),
-        "simulation_times": simulation_config.get("simulation_times", 200000),
         "start_income": simulation_config.get("start_income", start_income),
         "start_time": datetime.now(),
-        "time_steps": simulation_config.get("simulation_times", 200000),
+        "time_steps": simulation_config.get("time_steps", 200000),
         "total_income": simulation_config.get("total_income", 0),
     }
 
