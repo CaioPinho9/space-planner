@@ -5,7 +5,7 @@ from random import choices
 
 import pandas as pd
 
-from potato_types import ThingMaker
+from potato_types import ThingMaker, Thing
 
 
 # 27s buff probetato
@@ -127,5 +127,4 @@ class Simulation:
         print(f"Average income: {total_income / (simulation_index + 1):.2f}", end='')
 
     def save_simulation(self):
-        self.best_log.to_csv("best_log.csv", index=False)
         ThingMaker.save_thing_maker(self.configuration["best_income"])

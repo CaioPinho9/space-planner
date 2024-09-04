@@ -20,7 +20,7 @@ def start_simulation():
 
     best_log = pd.DataFrame(columns=["Index", "Time", "Income per Second", "Selected Object", "Cost"])
 
-    ThingMaker.load_thing_maker(True)
+    ThingMaker.load_thing_maker()
 
     start_income = ThingMaker.start_income
 
@@ -62,6 +62,12 @@ def start_simulation():
 def end_simulation():
     simulation.end_simulation()
     return jsonify({"message": "Simulation ended"})
+
+
+@app.route('/save_simulation', methods=['POST'])
+def save_simulation():
+    simulation.save_simulation()
+    return jsonify({"message": "Simulation saved"})
 
 
 if __name__ == '__main__':

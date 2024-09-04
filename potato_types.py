@@ -1,4 +1,4 @@
-import pickle
+import json
 from abc import ABC, abstractmethod
 from copy import deepcopy
 
@@ -30,6 +30,21 @@ class Thing(ABC):
     def quantity(self):
         return self._quantity
 
+    @quantity.setter
+    def quantity(self, value):
+        self._quantity = value
+        self._update_quantity()
+
+    @abstractmethod
+    def _update_quantity(self):
+        pass
+
+    # Serialize in json
+    def serialize(self):
+        return {
+            self.name: self.quantity
+        }
+
 
 class PotatoType(Thing):
     def __init__(self, name, power_output, quantity=0):
@@ -39,9 +54,7 @@ class PotatoType(Thing):
         self._efficiency = self.current_cost / self.power_output
 
     def buy(self):
-        self._quantity += 1
-        self.current_cost = Predictor.predict_thing_cost(self._quantity + 1, self.name)
-        self._efficiency = self.current_cost / self.power_output
+        self.quantity += 1
 
     @property
     def multiplier(self):
@@ -52,25 +65,30 @@ class PotatoType(Thing):
         self._multiplier = value
         self.power_output = self.base_power_output * self._multiplier
 
+    def _update_quantity(self):
+        self.current_cost = Predictor.predict_thing_cost(self._quantity + 1, self.name)
+        self._efficiency = self.current_cost / self.power_output
+
 
 class Upgrade(Thing):
     def __init__(self, name, target, multiplier, cost, quantity=0):
         super().__init__(name, cost, quantity, multiplier)
         self._multiplier = multiplier
         self._target = target
-        self._calculate_efficiency = True
         self._target_obj = None
 
     def _find_target(self):
-        if self._target_obj:
-            return self._target_obj
-
         for thing in ThingMaker.buyable_stuff:
             if thing.name == self._target:
                 return thing
 
     def buy(self):
-        self._quantity = 1
+        self.quantity = 1
+
+    def _update_quantity(self):
+        if not self.quantity:
+            return
+
         self._efficiency = 0
 
         thing = self._find_target()
@@ -78,10 +96,8 @@ class Upgrade(Thing):
 
     @property
     def efficiency(self):
-        if self._calculate_efficiency:
-            thing = self._find_target()
-            self._efficiency = self.current_cost / thing.power_output * self._multiplier
-
+        thing = self._find_target()
+        self._efficiency = self.current_cost / thing.power_output * self._multiplier
         return self._efficiency
 
     @property
@@ -104,15 +120,15 @@ class ThingMaker:
     @classmethod
     def create_things(cls):
         cls._things = [
-            PotatoType("SolarPanel", power_output=0.0885, quantity=15),
-            PotatoType("Potato", power_output=1.0, quantity=4),
-            PotatoType("Probetato", power_output=8.0, quantity=7),
-            PotatoType("Spudnik", power_output=42.0, quantity=0),
-            PotatoType("PotatoPlant", power_output=230, quantity=0),
+            PotatoType("SolarPanel", power_output=0.0885),
+            PotatoType("Potato", power_output=1.0),
+            PotatoType("Probetato", power_output=8.0),
+            PotatoType("Spudnik", power_output=42.0),
+            PotatoType("PotatoPlant", power_output=230),
         ]
 
         cls._upgrades = [
-            Upgrade("CleanSolarPanels", target="SolarPanel", multiplier=0.3 / 0.1, cost=1000, quantity=1),
+            Upgrade("CleanSolarPanels", target="SolarPanel", multiplier=0.3 / 0.1, cost=1000),
             Upgrade("SolarAmbience", target="SolarPanel", multiplier=0.0942 / 0.0885, cost=2600),
             Upgrade("MarisPipers", target="Potato", multiplier=2, cost=8000),
             Upgrade("PolishedSolarPanels", target="SolarPanel", multiplier=1 / 0.3, cost=15000),
@@ -135,24 +151,29 @@ class ThingMaker:
 
     @classmethod
     def save_thing_maker(cls, income):
-        with open('things.pkl', 'wb') as f:
-            save = cls.buyable_stuff, income
-            pickle.dump(save, f)
+        things_json = {}
+        for thing in cls.buyable_stuff:
+            things_json.update(thing.serialize())
+
+        things_json['start_income'] = income
+
+        with open('things.json', 'w') as f:
+            json.dump(things_json, f, indent=4)
 
     @classmethod
-    def load_thing_maker(cls, from_pickle):
-        if from_pickle:
-            try:
-                with open('things.pkl', 'rb') as f:
-                    cls._things, cls.start_income = pickle.load(f)
-                    return
-            except FileNotFoundError:
-                pass
-
+    def load_thing_maker(cls):
         cls.create_things()
-        for upgrade in cls._things:
-            if not upgrade.buyable:
-                upgrade.buy()
+
+        try:
+            with open('things.json', 'r') as f:
+                things_json = json.load(f)
+
+            for thing in cls._things:
+                thing.quantity = things_json.get(thing.name, 0)
+            cls.start_income = things_json.get('start_income', 0)
+        except FileNotFoundError:
+            pass
 
         cls._things = [thing for thing in cls._things if thing.buyable]
+
         cls.reset_buyable_stuff()
