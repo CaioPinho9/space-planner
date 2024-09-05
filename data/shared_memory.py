@@ -1,3 +1,6 @@
+import multiprocessing
+
+
 class SharedMemory:
     def __init__(self, thread_count):
         # Use manager to share the values across processes
@@ -12,8 +15,8 @@ class SharedMemory:
         self._total_income = manager.list([0] * thread_count)  # Shared list for incomes
         self._simulation_index = manager.list([0] * thread_count)  # Shared list for indices
 
-    def update_thread_income(self, thread_id, income):
-        self._total_income[thread_id] = income
+    def increase_thread_income(self, thread_id, income):
+        self._total_income[thread_id] += income
 
     def update_simulation_index(self, thread_id, index):
         self._simulation_index[thread_id] = index
@@ -29,6 +32,7 @@ class SharedMemory:
     @property
     def best_index(self):
         return self._best_index.value
+
 
     @best_income.setter
     def best_income(self, value):

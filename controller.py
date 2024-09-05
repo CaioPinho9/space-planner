@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pandas as pd
 from flask import Flask, request, jsonify
 
 from potato_types import ThingMaker
