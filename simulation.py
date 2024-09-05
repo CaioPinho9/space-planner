@@ -53,16 +53,16 @@ class Simulation:
         return True
 
     def end_simulation(self):
-        self.shared_memory.running_simulation = False
-        for thread in self.processes:
-            thread.join()
+        self.running_simulation = False
+        for process in self.processes:
+            process.terminate()
 
     def run_simulation(self, process_id):
         time_steps = self.configuration["time_steps"]
         while True:
             income_per_second = self.configuration["start_income"]
             simulation_index = self.shared_memory.simulation_index[process_id]
-            current_log = pd.DataFrame(columns=["Index", "Time", "Income per Second", "Selected Object", "Cost"])
+            current_log = pd.DataFrame(columns=["Time", "Income per Second", "Thing", "Cost", "Quantity"])
             simulation_things = ThingMaker.reset_simulation_things()
             current_w = 0
             # Calculate total efficiency
@@ -98,7 +98,6 @@ class Simulation:
                         with warnings.catch_warnings():
                             warnings.simplefilter(action='ignore', category=FutureWarning)
                             current_log = pd.concat([current_log, pd.DataFrame([{
-                                "Index": simulation_index,
                                 "Time": t,
                                 "Income per Second": income_per_second,
                                 "Thing": selected_obj.name,
@@ -111,14 +110,14 @@ class Simulation:
                     if income_per_second > self.shared_memory.best_income:
                         self.shared_memory.best_income = income_per_second
                         self.shared_memory.best_index = simulation_index
-                        self.shared_memory.best_log = current_log
+                        self.shared_memory.best_log = current_log.to_dict(orient='records')
 
             self.shared_memory.update_simulation_index(process_id, simulation_index + 1)
             self.shared_memory.increase_thread_income(process_id, income_per_second)
             if process_id == 0:
-                self.print_simulation_results(income_per_second)
+                self._print_simulation_results(income_per_second)
 
-    def print_simulation_results(self, income_per_second):
+    def _print_simulation_results(self, income_per_second):
         simulation_index = sum(self.shared_memory.simulation_index)
 
         start_time = self.configuration['start_time']
@@ -132,3 +131,6 @@ class Simulation:
 
     def save_simulation(self):
         ThingMaker.save_thing_maker(self.shared_memory.best_income)
+
+    def get_simulation_results(self):
+        return self.shared_memory

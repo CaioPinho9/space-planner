@@ -10,7 +10,7 @@ app = Flask(__name__)
 simulation = Simulation()
 
 
-@app.route('/start_simulation', methods=['POST'])
+@app.route('/simulation/start', methods=['POST'])
 def start_simulation():
     configuration = request.get_json()
 
@@ -37,16 +37,21 @@ def start_simulation():
     return jsonify("Simulation started")
 
 
-@app.route('/end_simulation', methods=['POST'])
+@app.route('/simulation/end', methods=['POST'])
 def end_simulation():
     simulation.end_simulation()
     return jsonify({"message": "Simulation ended"})
 
 
-@app.route('/save_simulation', methods=['POST'])
+@app.route('/simulation/save', methods=['POST'])
 def save_simulation():
     simulation.save_simulation()
     return jsonify({"message": "Simulation saved"})
+
+
+@app.route('/simulation/results', methods=['GET'])
+def get_simulation():
+    return jsonify(simulation.get_simulation_results().to_dict())
 
 
 if __name__ == '__main__':

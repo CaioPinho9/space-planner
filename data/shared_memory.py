@@ -33,14 +33,13 @@ class SharedMemory:
     def best_index(self):
         return self._best_index.value
 
-
     @best_income.setter
     def best_income(self, value):
         self._best_income.value = value
 
     @best_log.setter
     def best_log(self, value):
-        self._best_log = value
+        self._best_log[:] = value
 
     @best_index.setter
     def best_index(self, value):
@@ -53,3 +52,12 @@ class SharedMemory:
     @property
     def simulation_index(self):
         return self._simulation_index
+
+    def to_dict(self):
+        return {
+            "best_income": self.best_income,
+            "best_log": list(self.best_log),
+            "best_index": self.best_index,
+            "total_income": sum(self.total_income),
+            "simulation_index": sum(self.simulation_index)
+        }
