@@ -54,5 +54,20 @@ def get_simulation():
     return jsonify(simulation.get_simulation_results().to_dict())
 
 
+@app.route('/thing_maker/buy/<thing_name>', methods=['GET'])
+def buy_thing(thing_name):
+    if thing_name is None:
+        return jsonify({"error": "Missing thing name"}), 400
+
+    ThingMaker.buy_thing(thing_name)
+
+    return jsonify("Thing bought")
+
+
+@app.route('/thing_maker/buyable', methods=['GET'])
+def get_buyable_things():
+    return jsonify(ThingMaker.get_buyable_things())
+
+
 if __name__ == '__main__':
     app.run(debug=True)

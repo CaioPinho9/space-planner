@@ -78,8 +78,12 @@ class Upgrade(Thing):
         self._target_obj = None
 
     def _find_target(self):
+        if self._target_obj:
+            return self._target_obj
+
         for thing in ThingMaker.simulation_things:
             if thing.name == self._target:
+                self._target_obj = thing
                 return thing
 
     def buy(self):
@@ -152,7 +156,7 @@ class ThingMaker:
     @classmethod
     def save_thing_maker(cls, income):
         things_json = {}
-        for thing in cls.simulation_things:
+        for thing in cls._things:
             things_json.update(thing.serialize())
 
         things_json['start_income'] = income
@@ -177,3 +181,20 @@ class ThingMaker:
         cls._things = [thing for thing in cls._things if thing.buyable]
 
         cls.reset_simulation_things()
+
+    @classmethod
+    def buy_thing(cls, name):
+        for thing in cls._things:
+            if thing.name == name:
+                thing.buy()
+                return True
+
+        return False
+
+    @classmethod
+    def get_buyable_things(cls):
+        things = []
+        for thing in cls._things:
+            if thing.buyable:
+                things.append({"name": thing.name, "quantity": thing.quantity, "cost": thing.current_cost})
+        return things
