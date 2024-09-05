@@ -26,11 +26,11 @@ def start_simulation():
 
     simulation_config = {
         "best_index": simulation_config.get("best_index", -1),
-        "best_income": simulation_config.get("best_income", 1011),
+        "best_income": simulation_config.get("best_income", 0),
         "log": simulation_config.get("log", True),
         "start_income": simulation_config.get("start_income", start_income),
         "start_time": datetime.now(),
-        "time_steps": simulation_config.get("time_steps", 200000),
+        "time_steps": simulation_config.get("time_steps", 900),
         "total_income": simulation_config.get("total_income", 0),
     }
 

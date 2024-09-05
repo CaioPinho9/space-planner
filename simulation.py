@@ -115,7 +115,8 @@ class Simulation:
                         self.best_log = current_log
 
             self.configuration["simulation_index"][id] += 1
-            self.print_simulation_results(income_per_second, current_w)
+            if id == 0:
+                self.print_simulation_results(income_per_second, current_w)
 
     def print_simulation_results(self, income_per_second, current_w):
         best_income = self.configuration['best_income']
