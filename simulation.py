@@ -7,6 +7,7 @@ from random import choices
 import pandas as pd
 
 from potato_types import ThingMaker
+from data.shared_memory import SharedMemory
 
 
 # 27s buff probetato
@@ -14,11 +15,12 @@ from potato_types import ThingMaker
 # day 3:11min night 25s 3:36total
 
 class Simulation:
-    def __init__(self):
+    def __init__(self, process_count=None):
+        self.process_count = multiprocessing.cpu_count() if process_count is None else process_count
+        self.shared_memory = SharedMemory(process_count)
         self.running_simulation = False
         self.threads = []
         self.lock = threading.Lock()
-        self.best_log = None
         self.configuration = None
 
     @classmethod
@@ -41,14 +43,11 @@ class Simulation:
         if self.running_simulation:
             return False
 
-        process_count = multiprocessing.cpu_count()
-
-        simulation_config["simulation_index"] = [0] * process_count
         self.configuration = simulation_config
         self.running_simulation = True
 
-        for i in range(process_count):
-            self.threads.append(threading.Thread(target=self.run_simulation, args=(i,)))
+        for i in range(self.process_count):
+            self.threads.append(multiprocessing.Process(target=self.run_simulation, args=(i,)))
             self.threads[i].start()
         return True
 
@@ -57,11 +56,11 @@ class Simulation:
         for thread in self.threads:
             thread.join()
 
-    def run_simulation(self, id):
+    def run_simulation(self, process_id):
         time_steps = self.configuration["time_steps"]
         while self.running_simulation:
-            simulation_index = self.configuration["simulation_index"][id]
             income_per_second = self.configuration["start_income"]
+            simulation_index = self.shared_memory.simulation_index[process_id]
             current_log = pd.DataFrame(columns=["Index", "Time", "Income per Second", "Selected Object", "Cost"])
             simulation_things = ThingMaker.reset_simulation_things()
             current_w = 0
@@ -106,22 +105,21 @@ class Simulation:
                                 "Quantity": quantity
                             }])], ignore_index=True)
 
-            if income_per_second > self.configuration["best_income"]:
+            if income_per_second > self.shared_memory.best_income:
                 with self.lock:
-                    if income_per_second > self.configuration["best_income"]:
-                        self.configuration['best_income'] = income_per_second
-                        self.configuration['best_index'] = simulation_index
-                        self.configuration['best_log'] = current_log
-                        self.best_log = current_log
+                    if income_per_second > self.shared_memory.best_income:
+                        self.shared_memory.best_income = income_per_second
+                        self.shared_memory.best_index = simulation_index
+                        self.shared_memory.best_log = current_log
 
-            self.configuration["simulation_index"][id] += 1
-            if id == 0:
+            self.shared_memory.update_simulation_index(process_id, simulation_index + 1)
+            if process_id == 0:
                 self.print_simulation_results(income_per_second, current_w)
 
     def print_simulation_results(self, income_per_second, current_w):
-        best_income = self.configuration['best_income']
-        best_index = self.configuration['best_index']
-        simulation_index = sum(self.configuration['simulation_index'])
+        best_income = self.shared_memory.best_income
+        best_index = self.shared_memory.best_index
+        simulation_index = sum(self.shared_memory.simulation_index)
 
         start_time = self.configuration['start_time']
         elapsed_time = datetime.now() - start_time
@@ -133,4 +131,4 @@ class Simulation:
         print(f"Average income: {current_w / (simulation_index + 1):.2f}", end='')
 
     def save_simulation(self):
-        ThingMaker.save_thing_maker(self.configuration["best_income"])
+        ThingMaker.save_thing_maker(self.shared_memory.best_income)
