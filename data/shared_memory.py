@@ -1,4 +1,5 @@
 import multiprocessing
+import pickle
 from datetime import datetime
 
 
@@ -17,8 +18,6 @@ class SharedMemory:
         # Shared arrays
         self._total_income = manager.list([0] * thread_count)
         self._simulation_index = manager.list([0] * thread_count)
-
-        self._things = manager.list([])
 
     def increase_thread_income(self, thread_id, income):
         self._total_income[thread_id] += income
@@ -40,7 +39,9 @@ class SharedMemory:
 
     @property
     def things(self):
-        return self._things
+        # read from file pickle
+        with open("buyable.pickle", "rb") as f:
+            return pickle.load(f)
 
     @property
     def total_income(self):
@@ -64,7 +65,9 @@ class SharedMemory:
 
     @things.setter
     def things(self, value):
-        self._things[:] = value
+        # write in file pickle
+        with open("buyable.pickle", "wb") as f:
+            pickle.dump(value, f)
 
     def to_dict(self):
         total_income_sum = sum(self.total_income)

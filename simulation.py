@@ -26,7 +26,7 @@ class Simulation:
         self.time_steps = None
 
     @classmethod
-    def __calculate_normalized_efficiencies(cls, simulation_things, current_income, time_steps):
+    def _calculate_normalized_efficiencies(cls, simulation_things, current_income, time_steps):
         normalized_efficiencies = []
 
         mask_efficiency = [thing.buyable and not thing.current_cost / current_income > time_steps for thing in simulation_things]
@@ -75,13 +75,13 @@ class Simulation:
             simulation_things = self.thing_maker.reset_simulation_things()
             current_w = 0
             # Calculate total efficiency
-            normalized_efficiencies = self.__calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
+            normalized_efficiencies = self._calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
             last_bought = False
             for t in range(self.time_steps):
                 current_w += income_per_second  # accumulate income
 
                 if last_bought:
-                    normalized_efficiencies = self.__calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
+                    normalized_efficiencies = self._calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
                 else:
                     normalized_efficiencies = [
                         0 if upgrade.current_cost <= current_w - income_per_second else efficiency
