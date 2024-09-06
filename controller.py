@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from flask import Flask, request, jsonify
 
 from potato_types import ThingMaker
@@ -7,7 +5,9 @@ from simulation import Simulation
 
 app = Flask(__name__)
 
-simulation = Simulation()
+thing_maker = ThingMaker()
+simulation = Simulation(thing_maker)
+thing_maker.shared_memory = simulation.shared_memory
 
 
 @app.route('/simulation/start', methods=['POST'])
@@ -17,14 +17,8 @@ def start_simulation():
     if configuration is None:
         return jsonify({"error": "Invalid request"}), 400
 
-    ThingMaker.load_thing_maker()
-
-    start_income = ThingMaker.start_income
     time_steps = configuration.get("time_steps", 900)
-    start_income = configuration.get("start_income", start_income)
-
-    if configuration["start_income"] is None:
-        return jsonify({"error": "Missing start income"}), 400
+    start_income = configuration.get("start_income", None)
 
     # Run the simulation
     if not simulation.start_simulation(start_income, time_steps):
@@ -62,7 +56,7 @@ def buy_thing(thing_name):
 
 @app.route('/thing_maker/buyable', methods=['GET'])
 def get_buyable_things():
-    return jsonify(ThingMaker.get_buyable_things())
+    return jsonify(thing_maker.get_buyable_things())
 
 
 if __name__ == '__main__':

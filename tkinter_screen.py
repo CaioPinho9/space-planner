@@ -158,29 +158,28 @@ class SpacePlanner(tk.Tk):
 
     def start_simulation(self):
         start_income = self.start_income_entry.get()
-        if start_income:
-            try:
+        try:
+            payload = {}
+            if start_income:
                 start_income_value = float(start_income)
                 payload = {"start_income": start_income_value}
 
-                try:
-                    response = requests.post(host + '/simulation/start', json=payload)
-                    response.raise_for_status()  # Raise exception for 4XX/5XX errors
+            try:
+                response = requests.post(host + '/simulation/start', json=payload)
+                response.raise_for_status()  # Raise exception for 4XX/5XX errors
 
-                    if response.status_code == 200:
-                        print("Simulation started successfully!")
-                    else:
-                        print("Failed to start simulation.")
+                if response.status_code == 200:
+                    print("Simulation started successfully!")
+                else:
+                    print("Failed to start simulation.")
 
-                except (ConnectionError, Timeout) as e:
-                    print(f"Error: {e}. Could not connect to the server.")
-                except RequestException as e:
-                    print(f"Request failed: {e}")
+            except (ConnectionError, Timeout) as e:
+                print(f"Error: {e}. Could not connect to the server.")
+            except RequestException as e:
+                print(f"Request failed: {e}")
 
-            except ValueError:
-                print("Invalid start income. Please enter a valid number.")
-        else:
-            print("Start income is required.")
+        except ValueError:
+            print("Invalid start income. Please enter a valid number.")
 
     @staticmethod
     def end_simulation():

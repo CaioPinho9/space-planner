@@ -15,10 +15,11 @@ from data.shared_memory import SharedMemory
 # day 3:11min night 25s 3:36total
 
 class Simulation:
-    def __init__(self, process_count=None):
+    def __init__(self, thing_maker, process_count=None):
         self.running_simulation = False
         self.process_count = multiprocessing.cpu_count() if process_count is None else process_count
         self.shared_memory = SharedMemory(self.process_count)
+        self.thing_maker = thing_maker
         self.processes = []
         self.lock = threading.Lock()
         self.start_income = None
@@ -49,6 +50,11 @@ class Simulation:
         self.running_simulation = True
         self.shared_memory = SharedMemory(self.process_count)
         self.shared_memory.start_time = datetime.now()
+        self.thing_maker.shared_memory = self.shared_memory
+        self.thing_maker.load_thing_maker()
+
+        if start_income is None:
+            self.start_income = self.thing_maker.start_income if self.thing_maker.start_income is not None else .1
 
         self.processes = []
         for i in range(self.process_count):
@@ -66,7 +72,7 @@ class Simulation:
             income_per_second = self.start_income
             simulation_index = self.shared_memory.simulation_index[process_id]
             current_log = pd.DataFrame(columns=["Time", "Income per Second", "Thing", "Cost", "Quantity"])
-            simulation_things = ThingMaker.reset_simulation_things()
+            simulation_things = self.thing_maker.reset_simulation_things()
             current_w = 0
             # Calculate total efficiency
             normalized_efficiencies = self.__calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
@@ -119,7 +125,7 @@ class Simulation:
             self.shared_memory.increase_thread_income(process_id, income_per_second)
 
     def save_simulation(self):
-        ThingMaker.save_thing_maker(self.shared_memory.best_income)
+        self.thing_maker.save_thing_maker(self.shared_memory.best_income)
 
     def get_simulation_results(self):
         return self.shared_memory

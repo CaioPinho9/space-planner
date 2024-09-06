@@ -8,15 +8,17 @@ class SharedMemory:
         manager = multiprocessing.Manager()
 
         # Shared variables for inter-process communication
-        self._best_income = manager.Value('d', 0.0)  # 'd' for double (float)
-        self._best_log = manager.list()  # Use manager.list() for a shared list
-        self._best_index = manager.Value('i', -1)  # 'i' for integer
+        self._best_income = manager.Value('d', 0.0)
+        self._best_log = manager.list()
+        self._best_index = manager.Value('i', -1)
 
         self.start_time = None
 
         # Shared arrays
-        self._total_income = manager.list([0] * thread_count)  # Shared list for incomes
-        self._simulation_index = manager.list([0] * thread_count)  # Shared list for indices
+        self._total_income = manager.list([0] * thread_count)
+        self._simulation_index = manager.list([0] * thread_count)
+
+        self._things = manager.list([])
 
     def increase_thread_income(self, thread_id, income):
         self._total_income[thread_id] += income
@@ -36,6 +38,18 @@ class SharedMemory:
     def best_index(self):
         return self._best_index.value
 
+    @property
+    def things(self):
+        return self._things
+
+    @property
+    def total_income(self):
+        return self._total_income
+
+    @property
+    def simulation_index(self):
+        return self._simulation_index
+
     @best_income.setter
     def best_income(self, value):
         self._best_income.value = value
@@ -48,13 +62,9 @@ class SharedMemory:
     def best_index(self, value):
         self._best_index.value = value
 
-    @property
-    def total_income(self):
-        return self._total_income
-
-    @property
-    def simulation_index(self):
-        return self._simulation_index
+    @things.setter
+    def things(self, value):
+        self._things[:] = value
 
     def to_dict(self):
         total_income_sum = sum(self.total_income)

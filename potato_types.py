@@ -76,12 +76,16 @@ class Upgrade(Thing):
         self._multiplier = multiplier
         self._target = target
         self._target_obj = None
+        self._thing_maker = None
+
+    def set_injection(self, thing_maker):
+        self._thing_maker = thing_maker
 
     def _find_target(self):
         if self._target_obj:
             return self._target_obj
 
-        for thing in ThingMaker.simulation_things:
+        for thing in self._thing_maker.simulation_things:
             if thing.name == self._target:
                 self._target_obj = thing
                 return thing
@@ -117,13 +121,21 @@ class Upgrade(Thing):
 class ThingMaker:
     start_income = None
 
-    _things = []
     _upgrades = []
-    simulation_things = []
+    _things = []
+    _simulation_things = []
+    shared_memory = None
 
-    @classmethod
-    def create_things(cls):
-        cls._things = [
+    @property
+    def simulation_things(self):
+        return self._simulation_things
+
+    @simulation_things.setter
+    def simulation_things(self, value):
+        self._simulation_things = value
+
+    def create_things(self):
+        self.shared_memory.things = [
             PotatoType("SolarPanel", power_output=0.0885),
             PotatoType("Potato", power_output=1.0),
             PotatoType("Probetato", power_output=8.0),
@@ -131,7 +143,7 @@ class ThingMaker:
             PotatoType("PotatoPlant", power_output=230),
         ]
 
-        cls._upgrades = [
+        self._upgrades = [
             Upgrade("CleanSolarPanels", target="SolarPanel", multiplier=0.3 / 0.1, cost=1000),
             Upgrade("SolarAmbience", target="SolarPanel", multiplier=0.0942 / 0.0885, cost=2600),
             Upgrade("MarisPipers", target="Potato", multiplier=2, cost=8000),
@@ -143,20 +155,21 @@ class ThingMaker:
             Upgrade("ProbetatoPlanters", target="Probetato", multiplier=2, cost=1800000),
         ]
 
-        cls._things.extend(cls._upgrades)
+        for upgrade in self._upgrades:
+            upgrade.set_injection(self)
 
-        cls.simulation_things = cls._things
+        self.shared_memory.things.extend(self._upgrades)
 
-    @classmethod
-    def reset_simulation_things(cls):
-        cls.simulation_things = deepcopy(cls._things)
+        self.simulation_things = list(self.shared_memory.things)
 
-        return cls.simulation_things
+    def reset_simulation_things(self):
+        self.simulation_things = deepcopy(list(self.shared_memory.things))
 
-    @classmethod
-    def save_thing_maker(cls, income):
+        return self.simulation_things
+
+    def save_thing_maker(self, income):
         things_json = {}
-        for thing in cls._things:
+        for thing in self.shared_memory.things:
             things_json.update(thing.serialize())
 
         things_json['start_income'] = income
@@ -164,37 +177,34 @@ class ThingMaker:
         with open('things.json', 'w') as f:
             json.dump(things_json, f, indent=4)
 
-    @classmethod
-    def load_thing_maker(cls):
-        cls.create_things()
+    def load_thing_maker(self):
+        self.create_things()
 
         try:
             with open('things.json', 'r') as f:
                 things_json = json.load(f)
 
-            for thing in cls._things:
+            for thing in self.shared_memory.things:
                 thing.quantity = things_json.get(thing.name, 0)
-            cls.start_income = things_json.get('start_income', 0)
+            self.start_income = things_json.get('start_income', 0)
         except FileNotFoundError:
             pass
 
-        cls._things = [thing for thing in cls._things if thing.buyable]
+        self.shared_memory.things = [thing for thing in self.shared_memory.things if thing.buyable]
 
-        cls.reset_simulation_things()
+        self.reset_simulation_things()
 
-    @classmethod
-    def buy_thing(cls, name):
-        for thing in cls._things:
+    def buy_thing(self, name):
+        for thing in self.shared_memory.things:
             if thing.name == name:
                 thing.buy()
                 return True
 
         return False
 
-    @classmethod
-    def get_buyable_things(cls):
+    def get_buyable_things(self):
         things = []
-        for thing in cls._things:
+        for thing in self.shared_memory.things:
             if thing.buyable:
                 things.append({"name": thing.name, "quantity": thing.quantity, "cost": thing.current_cost})
         return things
