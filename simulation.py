@@ -47,6 +47,7 @@ class Simulation:
         self.start_income = start_income
         self.time_steps = time_steps
         self.running_simulation = True
+        self.shared_memory = SharedMemory(self.process_count)
         self.shared_memory.start_time = datetime.now()
 
         self.processes = []

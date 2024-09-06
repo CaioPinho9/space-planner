@@ -76,6 +76,6 @@ class SharedMemory:
             "best_index": self.best_index,
             "simulation_index": simulation_index_sum,
             "average_income": total_income_sum / simulation_index_sum,
-            "time_elapsed": elapsed_time,
+            "time_elapsed": elapsed_time.total_seconds(),
             "simulations_per_second": simulation_index_sum / elapsed_time.total_seconds()
         }

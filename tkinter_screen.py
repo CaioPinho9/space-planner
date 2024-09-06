@@ -57,19 +57,19 @@ class SpacePlanner(tk.Tk):
         self.buyable_list.bind("<<ListboxSelect>>", self.buy_item)
 
         # Start income input
-        tk.Label(self, text="Start Income:").grid(row=4, column=0, sticky="w")
+        tk.Label(self, text="Start Income:").grid(row=7, column=0, sticky="w")
         self.start_income_entry = tk.Entry(self)
-        self.start_income_entry.grid(row=4, column=1, sticky="ew")
+        self.start_income_entry.grid(row=7, column=1, sticky="ew")
 
         # Start, End, and Save buttons
         self.start_button = tk.Button(self, text="Start Simulation", command=self.start_simulation)
-        self.start_button.grid(row=5, column=0, columnspan=2, sticky="ew")
+        self.start_button.grid(row=8, column=0, columnspan=2, sticky="ew")
 
         self.end_button = tk.Button(self, text="End Simulation", command=self.end_simulation)
-        self.end_button.grid(row=6, column=0, columnspan=2, sticky="ew")
+        self.end_button.grid(row=9, column=0, columnspan=2, sticky="ew")
 
         self.save_button = tk.Button(self, text="Save Simulation", command=self.save_simulation)
-        self.save_button.grid(row=7, column=0, columnspan=2, sticky="ew")
+        self.save_button.grid(row=10, column=0, columnspan=2, sticky="ew")
 
         # Start the update loop
         self.update_simulation_results()
@@ -96,8 +96,13 @@ class SpacePlanner(tk.Tk):
                 self.label_vars["Best Income"].set(data["best_income"])
                 self.label_vars["Simulation Index"].set(data["simulation_index"])
                 self.label_vars["Average Income"].set(data["average_income"])
-                self.label_vars["Elapsed Time"].set(data["time_elapsed"])
+                # Convert seconds to datetime like hh:mm:ss
+                elapsed_time = int(data["time_elapsed"])
+                hours, remainder = divmod(elapsed_time, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                self.label_vars["Elapsed Time"].set(f"{hours:02d}:{minutes:02d}:{seconds:02d}")
                 self.label_vars["Simulations per Second"].set(data["simulations_per_second"])
+
 
         except (ConnectionError, Timeout) as e:
             print(f"Error: {e}. Could not connect to the server.")
@@ -139,7 +144,7 @@ class SpacePlanner(tk.Tk):
             thing_name = selected_item.split(":")[0]  # Extract thing name
 
             try:
-                response = requests.post(f'{host}/thing_maker/buy/{thing_name}')
+                response = requests.get(f'{host}/thing_maker/buy/{thing_name}')
                 response.raise_for_status()  # Raise exception for 4XX/5XX errors
 
                 if response.status_code == 200:
