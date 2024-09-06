@@ -20,18 +20,14 @@ def start_simulation():
     ThingMaker.load_thing_maker()
 
     start_income = ThingMaker.start_income
-
-    configuration = {
-        "start_income": configuration.get("start_income", start_income),
-        "start_time": datetime.now(),
-        "time_steps": configuration.get("time_steps", 900),
-    }
+    time_steps = configuration.get("time_steps", 900),
+    start_income = configuration.get("start_income", start_income),
 
     if configuration["start_income"] is None:
         return jsonify({"error": "Missing start income"}), 400
 
     # Run the simulation
-    if not simulation.start_simulation(configuration):
+    if not simulation.start_simulation(start_income, time_steps):
         return jsonify({"error": "Simulation already running"}), 400
 
     return jsonify("Simulation started")

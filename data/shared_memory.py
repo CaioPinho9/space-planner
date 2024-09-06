@@ -1,4 +1,5 @@
 import multiprocessing
+from datetime import datetime
 
 
 class SharedMemory:
@@ -10,6 +11,8 @@ class SharedMemory:
         self._best_income = manager.Value('d', 0.0)  # 'd' for double (float)
         self._best_log = manager.list()  # Use manager.list() for a shared list
         self._best_index = manager.Value('i', -1)  # 'i' for integer
+
+        self.start_time = None
 
         # Shared arrays
         self._total_income = manager.list([0] * thread_count)  # Shared list for incomes
@@ -54,10 +57,25 @@ class SharedMemory:
         return self._simulation_index
 
     def to_dict(self):
+        total_income_sum = sum(self.total_income)
+        simulation_index_sum = sum(self.simulation_index)
+        if simulation_index_sum == 0 or not self.start_time:
+            return {
+                "best_income": 0,
+                "best_log": [],
+                "best_index": -1,
+                "simulation_index": 0,
+                "average_income": 0,
+                "time_elapsed": 0,
+                "simulations_per_second": 0
+            }
+        elapsed_time = datetime.now() - self.start_time
         return {
             "best_income": self.best_income,
             "best_log": list(self.best_log),
             "best_index": self.best_index,
-            "total_income": sum(self.total_income),
-            "simulation_index": sum(self.simulation_index)
+            "simulation_index": simulation_index_sum,
+            "average_income": total_income_sum / simulation_index_sum,
+            "time_elapsed": elapsed_time,
+            "simulations_per_second": simulation_index_sum / elapsed_time.total_seconds()
         }

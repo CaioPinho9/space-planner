@@ -21,7 +21,8 @@ class Simulation:
         self.shared_memory = SharedMemory(self.process_count)
         self.processes = []
         self.lock = threading.Lock()
-        self.configuration = None
+        self.start_income = None
+        self.time_steps = None
 
     @classmethod
     def __calculate_normalized_efficiencies(cls, simulation_things, current_income, time_steps):
@@ -39,12 +40,14 @@ class Simulation:
             normalized_efficiencies.append(efficiency)
         return normalized_efficiencies
 
-    def start_simulation(self, simulation_config):
+    def start_simulation(self, start_income, time_steps):
         if self.running_simulation:
             return False
 
-        self.configuration = simulation_config
+        self.start_income = start_income
+        self.time_steps = time_steps
         self.running_simulation = True
+        self.shared_memory.start_time = datetime.now()
 
         self.processes = []
         for i in range(self.process_count):
@@ -58,21 +61,20 @@ class Simulation:
             process.terminate()
 
     def run_simulation(self, process_id):
-        time_steps = self.configuration["time_steps"]
         while True:
-            income_per_second = self.configuration["start_income"]
+            income_per_second = self.start_income
             simulation_index = self.shared_memory.simulation_index[process_id]
             current_log = pd.DataFrame(columns=["Time", "Income per Second", "Thing", "Cost", "Quantity"])
             simulation_things = ThingMaker.reset_simulation_things()
             current_w = 0
             # Calculate total efficiency
-            normalized_efficiencies = self.__calculate_normalized_efficiencies(simulation_things, income_per_second, time_steps)
+            normalized_efficiencies = self.__calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
             last_bought = False
-            for t in range(time_steps):
+            for t in range(self.time_steps):
                 current_w += income_per_second  # accumulate income
 
                 if last_bought:
-                    normalized_efficiencies = self.__calculate_normalized_efficiencies(simulation_things, income_per_second, time_steps)
+                    normalized_efficiencies = self.__calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
                 else:
                     normalized_efficiencies = [
                         0 if upgrade.current_cost <= current_w - income_per_second else efficiency
@@ -114,20 +116,6 @@ class Simulation:
 
             self.shared_memory.update_simulation_index(process_id, simulation_index + 1)
             self.shared_memory.increase_thread_income(process_id, income_per_second)
-            if process_id == 0:
-                self._print_simulation_results(income_per_second)
-
-    def _print_simulation_results(self, income_per_second):
-        simulation_index = sum(self.shared_memory.simulation_index)
-
-        start_time = self.configuration['start_time']
-        elapsed_time = datetime.now() - start_time
-
-        print(f"\rSimulation {simulation_index} completed with income per second: {income_per_second:.0f}", end=' | ')
-        print(f"Best Simulation {self.shared_memory.best_index} completed with income per second: {self.shared_memory.best_income:.0f}", end=' | ')
-        print(f"Time taken: {elapsed_time}", end=' | ')
-        print(f"Simulations per second: {(simulation_index + 1) / elapsed_time.total_seconds():.2f}", end=' | ')
-        print(f"Average income: {sum(self.shared_memory.total_income) / (simulation_index + 1):.2f}", end='')
 
     def save_simulation(self):
         ThingMaker.save_thing_maker(self.shared_memory.best_income)
