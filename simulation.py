@@ -5,6 +5,7 @@ from datetime import datetime
 from random import choices
 
 import pandas as pd
+from numpy.distutils.system_info import cblas_info
 
 from potato_types import ThingMaker
 from data.shared_memory import SharedMemory
@@ -73,6 +74,13 @@ class Simulation:
             simulation_index = self.shared_memory.simulation_index[process_id]
             current_log = pd.DataFrame(columns=["Time", "Income per Second", "Thing", "Cost", "Quantity"])
             simulation_things = self.thing_maker.reset_simulation_things()
+
+            if simulation_things is None or not self.thing_maker.simulation_things:
+                continue
+
+            for thing in simulation_things:
+                income_per_second += thing.power_output * thing.quantity
+
             current_w = 0
             # Calculate total efficiency
             normalized_efficiencies = self._calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)

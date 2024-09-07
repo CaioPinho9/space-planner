@@ -39,6 +39,9 @@ class Thing(ABC):
     def _update_quantity(self):
         pass
 
+    def set_injection(self, thing_maker):
+        pass
+
     # Serialize in json
     def serialize(self):
         return {
@@ -158,12 +161,17 @@ class ThingMaker:
         for upgrade in self._upgrades:
             upgrade.set_injection(self)
 
-        self.shared_memory.things.extend(self._upgrades)
+        temp = self.shared_memory.things
+        temp.extend(self._upgrades)
+        self.shared_memory.things = temp
 
-        self.simulation_things = list(self.shared_memory.things)
+        self.simulation_things = self.shared_memory.things
 
     def reset_simulation_things(self):
-        self.simulation_things = deepcopy(list(self.shared_memory.things))
+        try:
+            self.simulation_things = deepcopy(self.shared_memory.things)
+        except TypeError:
+            return None
 
         return self.simulation_things
 
@@ -195,9 +203,11 @@ class ThingMaker:
         self.reset_simulation_things()
 
     def buy_thing(self, name):
-        for thing in self.shared_memory.things:
+        temp = self.shared_memory.things
+        for thing in temp:
             if thing.name == name:
                 thing.buy()
+                self.shared_memory.things = temp
                 return True
 
         return False

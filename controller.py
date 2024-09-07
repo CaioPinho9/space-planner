@@ -49,7 +49,7 @@ def buy_thing(thing_name):
     if thing_name is None:
         return jsonify({"error": "Missing thing name"}), 400
 
-    ThingMaker.buy_thing(thing_name)
+    thing_maker.buy_thing(thing_name)
 
     return jsonify("Thing bought")
 

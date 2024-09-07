@@ -133,9 +133,9 @@ class SpacePlanner(tk.Tk):
 
         except (ConnectionError, Timeout) as e:
             print(f"Error: {e}. Could not connect to the server.")
-            self.after(1000, self.update_buyable_list)
         except RequestException as e:
             print(f"Request failed: {e}")
+        self.after(1000, self.update_buyable_list)
 
     def buy_item(self, event):
         selection = self.buyable_list.curselection()
