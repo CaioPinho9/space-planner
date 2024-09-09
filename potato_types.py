@@ -5,7 +5,6 @@ from copy import deepcopy
 from predictor import Predictor
 
 
-
 class Thing(ABC):
     def __init__(self, name, cost, quantity, multiplier):
         self.name = name
@@ -54,8 +53,16 @@ class PotatoType(Thing):
     def __init__(self, name, power_output, quantity=0):
         super().__init__(name, Predictor.predict_thing_cost(quantity + 1, name), quantity, 1)
         self.base_power_output = power_output
-        self.power_output = self.base_power_output
-        self._efficiency = self.current_cost / self.power_output
+        self._power_output = self.base_power_output
+        self._efficiency = self.current_cost / self._power_output
+
+    @property
+    def power_output(self):
+        return self._power_output
+
+    @power_output.setter
+    def power_output(self, value):
+        self._power_output = value
 
     def buy(self):
         self.quantity += 1
@@ -122,6 +129,23 @@ class Upgrade(Thing):
         return not self._quantity
 
 
+class Probetato(PotatoType):
+    def __init__(self, name, power_output, quantity=0):
+        super().__init__(name, power_output, quantity)
+        self._efficiency = self._probetato_efficiency()
+
+    def _probetato_efficiency(self):
+        return self.current_cost / self.power_output if self.quantity >= 3 else self.current_cost / self.base_power_output
+
+    @property
+    def power_output(self):
+        return self._power_output if self.quantity >= 3 else 0
+
+    def _update_quantity(self):
+        self.current_cost = Predictor.predict_thing_cost(self._quantity + 1, self.name)
+        self._efficiency = self._probetato_efficiency()
+
+
 class ThingMaker:
     start_income = None
 
@@ -131,7 +155,6 @@ class ThingMaker:
     _things = []
     _simulation_things = []
     shared_memory = None
-
 
     @property
     def simulation_things(self):
@@ -149,7 +172,7 @@ class ThingMaker:
         self.shared_memory.things = [
             PotatoType("SolarPanel", power_output=0.0885),
             PotatoType("Potato", power_output=1.0),
-            PotatoType("Probetato", power_output=8.0),
+            Probetato("Probetato", power_output=8.0),
             PotatoType("Spudnik", power_output=42.0),
             PotatoType("PotatoPlant", power_output=230),
         ]
@@ -211,7 +234,12 @@ class ThingMaker:
 
     @staticmethod
     def current_income(things):
-        return sum([thing.power_output * thing.quantity for thing in things])
+        total = 0
+        for thing in things:
+            if isinstance(thing, Probetato):
+                total -= thing.power_output * max(thing.quantity, 3)
+            total += thing.power_output * thing.quantity
+        return total
 
     def buy_thing(self, name):
         temp = self.shared_memory.things

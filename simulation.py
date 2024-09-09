@@ -56,9 +56,6 @@ class Simulation:
         self.thing_maker.shared_memory = self.shared_memory
         self.thing_maker.load_thing_maker()
 
-        if start_income is None:
-            self.start_income = self.thing_maker.start_income if self.thing_maker.start_income is not None else .1
-
         self.processes = []
         for i in range(self.process_count):
             self.processes.append(multiprocessing.Process(target=self.run_simulation, args=(i,)))
@@ -78,8 +75,7 @@ class Simulation:
                 current_log = pd.DataFrame(columns=["Time", "Income", "Thing", "Cost", "Quantity"])
                 simulation_things = self.thing_maker.reset_simulation_things()
 
-                for thing in simulation_things:
-                    income_per_second += thing.power_output * thing.quantity
+                income_per_second = ThingMaker.current_income(simulation_things) if income_per_second is None else 0.1
 
                 current_w = 0
                 # Calculate total efficiency
