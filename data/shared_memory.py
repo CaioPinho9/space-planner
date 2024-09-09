@@ -25,12 +25,12 @@ class SharedMemory:
 
         self._shared_memory_file = "resource/shared/shared_things.pickle"
 
-    def increase_thread_income(self, thread_id, income):
-        self._total_income[thread_id] += income
+        self.things = []
 
-    def increase_simulation_index(self, thread_id):
+    def increase_simulation(self, thread_id, income):
         self._simulation_index[thread_id] += 1
         self._simulation_index_since_last_thing[thread_id] += 1
+        self._total_income[thread_id] += income
 
     @property
     def best_income(self):
@@ -82,7 +82,6 @@ class SharedMemory:
         # write in file pickle
         with open(self._shared_memory_file, "wb") as f:
             pickle.dump(value, f)
-
 
     @simulation_index_since_last_thing.setter
     def simulation_index_since_last_thing(self, value):

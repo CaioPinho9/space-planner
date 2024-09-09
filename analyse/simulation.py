@@ -1,7 +1,6 @@
 import multiprocessing
 import threading
 import warnings
-from datetime import datetime
 from random import choices
 
 import pandas as pd
@@ -135,9 +134,7 @@ class Simulation:
                             self.shared_memory.best_index = simulation_index
                             self.shared_memory.best_log = current_log.to_dict(orient='records')
 
-                self.shared_memory.increase_simulation_index(process_id)
-                self.shared_memory.increase_thread_income(process_id, income_per_second)
-
+                self.shared_memory.increase_simulation(process_id, income_per_second)
             except TypeError as e:
                 continue
 
