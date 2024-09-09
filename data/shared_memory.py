@@ -2,7 +2,7 @@ import multiprocessing
 import pickle
 from datetime import datetime
 
-from potato_types import ThingMaker
+from managers.thing_maker import ThingMaker
 
 
 class SharedMemory:
@@ -16,7 +16,7 @@ class SharedMemory:
         self._best_log = manager.list()
         self._best_index = manager.Value('i', -1)
 
-        self.start_time = None
+        self.start_time = datetime.now()
 
         # Shared arrays
         self._total_income = manager.list([0] * thread_count)

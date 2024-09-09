@@ -1,17 +1,17 @@
+from analyse.predictor import Predictor
 from flask import Flask, request, jsonify
 
-from potato_types import ThingMaker
-from predictor import Predictor
-from simulation import Simulation
+from analyse.simulation import Simulation
+from managers.thing_maker import ThingMaker
 
-app = Flask(__name__)
+flask_app = Flask(__name__)
 
 thing_maker = ThingMaker()
 simulation = Simulation(thing_maker)
 thing_maker.shared_memory = simulation.shared_memory
 
 
-@app.route('/simulation/start', methods=['POST'])
+@flask_app.route('/simulation/start', methods=['POST'])
 def start_simulation():
     configuration = request.get_json()
 
@@ -28,24 +28,24 @@ def start_simulation():
     return jsonify("Simulation started")
 
 
-@app.route('/simulation/end', methods=['POST'])
+@flask_app.route('/simulation/end', methods=['POST'])
 def end_simulation():
     simulation.end_simulation()
     return jsonify({"message": "Simulation ended"})
 
 
-@app.route('/simulation/save', methods=['POST'])
+@flask_app.route('/simulation/save', methods=['POST'])
 def save_simulation():
     simulation.save_simulation()
     return jsonify({"message": "Simulation saved"})
 
 
-@app.route('/simulation/results', methods=['GET'])
+@flask_app.route('/simulation/results', methods=['GET'])
 def get_simulation():
     return jsonify(simulation.get_simulation_results().to_dict())
 
 
-@app.route('/thing_maker/buy/<thing_name>', methods=['GET'])
+@flask_app.route('/thing_maker/buy/<thing_name>', methods=['GET'])
 def buy_thing(thing_name):
     if thing_name is None:
         return jsonify({"error": "Missing thing name"}), 400
@@ -56,16 +56,16 @@ def buy_thing(thing_name):
     return jsonify("Thing bought")
 
 
-@app.route('/thing_maker/buyable', methods=['GET'])
+@flask_app.route('/thing_maker/buyable', methods=['GET'])
 def get_buyable_things():
     return jsonify(thing_maker.get_buyable_things())
 
 
-@app.route('/predictor/thing_price/<thing_name>/<price>', methods=['GET'])
+@flask_app.route('/predictor/thing_price/<thing_name>/<price>', methods=['GET'])
 def predict_price(thing_name, price):
     Predictor.add_price_evolution(thing_name, price)
     return jsonify("Price added")
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    flask_app.run(debug=True)

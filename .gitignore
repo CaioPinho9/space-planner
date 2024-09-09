@@ -1,2 +1,4 @@
 .idea
 .idea/*
+resource/shared/*
+resource/save/*

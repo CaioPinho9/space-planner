@@ -6,9 +6,10 @@ from random import choices
 
 import pandas as pd
 
-from data.buff_manager import BuffManager
-from potato_types import ThingMaker
 from data.shared_memory import SharedMemory
+from managers.buff_manager import BuffManager
+from managers.thing_maker import ThingMaker
+from managers.thing_maker_starter import ThingMakerStarter
 
 
 # 27s buff probetato
@@ -25,6 +26,7 @@ class Simulation:
         self.lock = threading.Lock()
         self.start_income = None
         self.time_steps = None
+        self.thing_maker_starter = ThingMakerStarter(self.thing_maker)
 
     @classmethod
     def _calculate_normalized_efficiencies(cls, simulation_things, current_income, time_steps):
@@ -50,8 +52,9 @@ class Simulation:
         self.time_steps = time_steps
         self.running_simulation = True
         self.shared_memory = SharedMemory(self.process_count)
-        self.shared_memory.start_time = datetime.now()
         self.thing_maker.shared_memory = self.shared_memory
+
+        self.thing_maker_starter.start()
         self.thing_maker.load_thing_maker()
 
         self.processes = []

@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, simpledialog
 import requests
-import json
 from requests.exceptions import ConnectionError, Timeout, RequestException
 
 host = "http://127.0.0.1:5000"
@@ -298,7 +297,6 @@ class SpacePlanner(tk.Tk):
             tree.insert("", "end", values=values)
 
 
-# Run the app
-if __name__ == "__main__":
-    app = SpacePlanner()
-    app.mainloop()
+def run_tkinter():
+    space_planner = SpacePlanner()
+    space_planner.mainloop()

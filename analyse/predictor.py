@@ -152,6 +152,8 @@ class Predictor:
         with open(cls.json_file_path, 'w') as file:
             json.dump(json_data, file)
 
+        Predictor.generate_parameters(plot=True)
+
 
 if __name__ == '__main__':
     Predictor.generate_parameters(plot=True)
