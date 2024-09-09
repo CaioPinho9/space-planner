@@ -1,6 +1,6 @@
 {
-    "SolarPanel": 10,
-    "Potato": 6,
+    "SolarPanel": 32,
+    "Potato": 13,
     "Probetato": 3,
     "Spudnik": 0,
     "PotatoPlant": 0,
@@ -13,5 +13,5 @@
     "GoldenSolarPanels": 0,
     "GoldenSpudnikFoil": 0,
     "ProbetatoPlanters": 0,
-    "start_income": 6.884999999999998
+    "start_income": 15.832
 }

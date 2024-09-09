@@ -2,6 +2,7 @@ import json
 from abc import ABC, abstractmethod
 from copy import deepcopy
 
+from data.buff import Buff
 from predictor import Predictor
 
 
@@ -54,7 +55,7 @@ class PotatoType(Thing):
         super().__init__(name, Predictor.predict_thing_cost(quantity + 1, name), quantity, 1)
         self.base_power_output = power_output
         self._power_output = self.base_power_output
-        self._efficiency = self.current_cost / self._power_output
+        self._efficiency = self._power_output / self.current_cost
 
     @property
     def power_output(self):
@@ -78,7 +79,7 @@ class PotatoType(Thing):
 
     def _update_quantity(self):
         self.current_cost = Predictor.predict_thing_cost(self._quantity + 1, self.name)
-        self._efficiency = self.current_cost / self.power_output
+        self._efficiency = self.power_output / self.current_cost
 
 
 class Upgrade(Thing):
@@ -116,7 +117,7 @@ class Upgrade(Thing):
     @property
     def efficiency(self):
         thing = self._find_target()
-        self._efficiency = self.current_cost / thing.power_output * self._multiplier
+        self._efficiency = (thing.power_output * self._multiplier) / self.current_cost
         return self._efficiency
 
     @property
@@ -135,7 +136,7 @@ class Probetato(PotatoType):
         self._efficiency = self._probetato_efficiency()
 
     def _probetato_efficiency(self):
-        return self.current_cost / self.power_output if self.quantity >= 3 else self.current_cost / self.base_power_output
+        return self.power_output / self.current_cost if self.quantity >= 3 else self.base_power_output / self.current_cost
 
     @property
     def power_output(self):
@@ -144,6 +145,11 @@ class Probetato(PotatoType):
     def _update_quantity(self):
         self.current_cost = Predictor.predict_thing_cost(self._quantity + 1, self.name)
         self._efficiency = self._probetato_efficiency()
+
+    def buy(self):
+        buff = Buff("ProbetatoBuff", 27, self.power_output * 0.5 if self.quantity >= 3 else self.base_power_output * 1.5)
+        super().buy()
+        return buff
 
 
 class ThingMaker:
@@ -199,11 +205,14 @@ class ThingMaker:
         self.simulation_things = self.shared_memory.things
 
     def reset_simulation_things(self):
-        self.simulation_things = deepcopy(self.shared_memory.things)
+        try:
+            self.simulation_things = deepcopy(self.shared_memory.things)
 
-        self.simulation_things = [thing for thing in self.simulation_things if thing.buyable]
+            self.simulation_things = [thing for thing in self.simulation_things if thing.buyable]
 
-        return self.simulation_things
+            return self.simulation_things
+        except Exception:
+            return None
 
     def save_thing_maker(self):
         things_json = {}

@@ -3,12 +3,10 @@ import threading
 import warnings
 from datetime import datetime
 from random import choices
-from turtledemo.forest import start
 
-import numpy as np
 import pandas as pd
-from numpy.distutils.system_info import cblas_info
 
+from data.buff_manager import BuffManager
 from potato_types import ThingMaker
 from data.shared_memory import SharedMemory
 
@@ -75,6 +73,11 @@ class Simulation:
                 current_log = pd.DataFrame(columns=["Time", "Income", "Thing", "Cost", "Quantity"])
                 simulation_things = self.thing_maker.reset_simulation_things()
 
+                if simulation_things is None:
+                    continue
+
+                buff_manager = BuffManager()
+
                 income_per_second = ThingMaker.current_income(simulation_things) if income_per_second is None else 0.1
 
                 current_w = 0
@@ -84,6 +87,7 @@ class Simulation:
 
                 for t in range(self.time_steps):
                     current_w += income_per_second  # accumulate income
+                    income_per_second += buff_manager.use()
 
                     if last_bought:
                         normalized_efficiencies = self._calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
@@ -106,7 +110,9 @@ class Simulation:
 
                             income_per_second += selected_obj.power_output
 
-                            selected_obj.buy()
+                            buff = selected_obj.buy()
+
+                            income_per_second += buff_manager.add_buff(buff)
 
                             # Log the event
                             with warnings.catch_warnings():
