@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 
 
 class Predictor:
-    _predict_parameters_file_name = 'fitted_parameters.csv'  # File to save the parameters
+    json_file_path = 'thing_price_evolution.json'
+    _predict_parameters_file_name = 'resource/predict/fitted_parameters.csv'  # File to save the parameters
     _predict_parameters = None
 
     # Define the exponential function
@@ -57,8 +58,7 @@ class Predictor:
     @classmethod
     def generate_parameters(cls, plot=False):
         # Read JSON data from a file
-        json_file_path = 'thing_price_evolution.json'
-        with open(json_file_path, 'r') as file:
+        with open(cls.json_file_path, 'r') as file:
             json_data = json.load(file)
 
         # Convert lists to pandas Series to handle different lengths
@@ -138,6 +138,19 @@ class Predictor:
             return round(cls.__exponential_func(value, a, b))
 
         return None
+
+    @classmethod
+    def add_price_evolution(cls, thing, price):
+        with open(cls.json_file_path, 'r') as file:
+            json_data = json.load(file)
+
+        if thing not in json_data:
+            json_data[thing] = []
+
+        json_data[thing].append(int(price))
+
+        with open(cls.json_file_path, 'w') as file:
+            json.dump(json_data, file)
 
 
 if __name__ == '__main__':

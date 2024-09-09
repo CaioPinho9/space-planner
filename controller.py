@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 
 from potato_types import ThingMaker
+from predictor import Predictor
 from simulation import Simulation
 
 app = Flask(__name__)
@@ -49,6 +50,7 @@ def buy_thing(thing_name):
     if thing_name is None:
         return jsonify({"error": "Missing thing name"}), 400
 
+    simulation.buy_thing()
     thing_maker.buy_thing(thing_name)
 
     return jsonify("Thing bought")
@@ -57,6 +59,12 @@ def buy_thing(thing_name):
 @app.route('/thing_maker/buyable', methods=['GET'])
 def get_buyable_things():
     return jsonify(thing_maker.get_buyable_things())
+
+
+@app.route('/predictor/thing_price/<thing_name>/<price>', methods=['GET'])
+def predict_price(thing_name, price):
+    Predictor.add_price_evolution(thing_name, price)
+    return jsonify("Price added")
 
 
 if __name__ == '__main__':

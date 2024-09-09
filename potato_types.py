@@ -5,6 +5,7 @@ from copy import deepcopy
 from predictor import Predictor
 
 
+
 class Thing(ABC):
     def __init__(self, name, cost, quantity, multiplier):
         self.name = name
@@ -124,13 +125,20 @@ class Upgrade(Thing):
 class ThingMaker:
     start_income = None
 
+    _save_file = 'resource/save/things.json'
+
     _upgrades = []
     _things = []
     _simulation_things = []
     shared_memory = None
 
+
     @property
     def simulation_things(self):
+        if not self._simulation_things:
+            for thing in self.shared_memory.things:
+                thing.set_injection(self)
+            return self.reset_simulation_things()
         return self._simulation_things
 
     @simulation_things.setter
@@ -168,39 +176,42 @@ class ThingMaker:
         self.simulation_things = self.shared_memory.things
 
     def reset_simulation_things(self):
-        try:
-            self.simulation_things = deepcopy(self.shared_memory.things)
-        except TypeError:
-            return None
+        self.simulation_things = deepcopy(self.shared_memory.things)
+
+        self.simulation_things = [thing for thing in self.simulation_things if thing.buyable]
 
         return self.simulation_things
 
-    def save_thing_maker(self, income):
+    def save_thing_maker(self):
         things_json = {}
         for thing in self.shared_memory.things:
             things_json.update(thing.serialize())
 
-        things_json['start_income'] = income
+        things_json['start_income'] = ThingMaker.current_income(self.shared_memory.things)
 
-        with open('things.json', 'w') as f:
+        with open(self._save_file, 'w') as f:
             json.dump(things_json, f, indent=4)
 
     def load_thing_maker(self):
         self.create_things()
 
         try:
-            with open('things.json', 'r') as f:
+            with open(self._save_file, 'r') as f:
                 things_json = json.load(f)
 
-            for thing in self.shared_memory.things:
+            temp = self.shared_memory.things
+            for thing in temp:
                 thing.quantity = things_json.get(thing.name, 0)
+            self.shared_memory.things = temp
             self.start_income = things_json.get('start_income', 0)
         except FileNotFoundError:
             pass
 
-        self.shared_memory.things = [thing for thing in self.shared_memory.things if thing.buyable]
-
         self.reset_simulation_things()
+
+    @staticmethod
+    def current_income(things):
+        return sum([thing.power_output * thing.quantity for thing in things])
 
     def buy_thing(self, name):
         temp = self.shared_memory.things
