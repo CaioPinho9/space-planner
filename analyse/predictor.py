@@ -150,9 +150,9 @@ class Predictor:
         json_data[thing].append(int(price))
 
         with open(cls.json_file_path, 'w') as file:
-            json.dump(json_data, file)
+            json.dump(json_data, file, indent=2)
 
-        Predictor.generate_parameters(plot=True)
+        Predictor.generate_parameters()
 
 
 if __name__ == '__main__':

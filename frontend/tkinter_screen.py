@@ -269,7 +269,7 @@ class SpacePlanner(tk.Tk):
 
                 # Send the new value to the server
                 try:
-                    response = requests.get(f'{host}/predictor/thing_price/{thing_name}/{new_price}')
+                    response = requests.get(f'{host}/predictor/thing_price/{thing_name}/{int(new_price)}')
                     response.raise_for_status()
 
                     if response.status_code == 200:

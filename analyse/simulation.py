@@ -68,9 +68,9 @@ class Simulation:
             process.terminate()
 
     def run_simulation(self, process_id):
+        count = 0
         while True:
             try:
-                income_per_second = self.start_income
                 simulation_index = self.shared_memory.simulation_index[process_id]
                 current_log = pd.DataFrame(columns=["Time", "Income", "Thing", "Cost", "Quantity"])
                 simulation_things = self.thing_maker.reset_simulation_things()
@@ -80,7 +80,10 @@ class Simulation:
 
                 buff_manager = BuffManager()
 
-                income_per_second = ThingMaker.current_income(simulation_things) if income_per_second is None else 0.1
+                income_per_second = ThingMaker.current_income(simulation_things)
+
+                if income_per_second == 0:
+                    income_per_second = 0.1
 
                 current_w = 0
                 # Calculate total efficiency
@@ -134,7 +137,10 @@ class Simulation:
                             self.shared_memory.best_index = simulation_index
                             self.shared_memory.best_log = current_log.to_dict(orient='records')
 
-                self.shared_memory.increase_simulation(process_id, income_per_second)
+                count += 1
+
+                if count % 50 == 0:
+                    self.shared_memory.increase_simulation(process_id, income_per_second, 50)
             except TypeError as e:
                 continue
 

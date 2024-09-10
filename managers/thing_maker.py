@@ -30,11 +30,7 @@ class ThingMaker:
 
     def reset_simulation_things(self):
         try:
-            self.simulation_things = deepcopy(self.shared_memory.things)
-
-            self.simulation_things = [thing for thing in self.simulation_things if thing.buyable]
-
-            return self.simulation_things
+            return deepcopy(self.shared_memory.things)
         except Exception:
             return None
 
@@ -68,7 +64,7 @@ class ThingMaker:
         total = 0
         for thing in things:
             if thing.name == 'Probetato':
-                total -= thing.power_output * max(thing.quantity, 3)
+                total -= thing.power_output * min(thing.quantity, 3)
             total += thing.power_output * thing.quantity
         return total
 

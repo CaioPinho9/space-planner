@@ -9,6 +9,8 @@ class SharedMemory:
     def __init__(self, thread_count):
         # Use self.manager to share the values across processes
         self._things = []
+
+        self._thread_count = thread_count
         manager = multiprocessing.Manager()
 
         # Shared variables for inter-process communication
@@ -27,10 +29,10 @@ class SharedMemory:
 
         self.things = []
 
-    def increase_simulation(self, thread_id, income):
-        self._simulation_index[thread_id] += 1
-        self._simulation_index_since_last_thing[thread_id] += 1
-        self._total_income[thread_id] += income
+    def increase_simulation(self, thread_id, income, multiplier):
+        self._simulation_index[thread_id] += multiplier
+        self._simulation_index_since_last_thing[thread_id] += multiplier
+        self._total_income[thread_id] += income * multiplier
 
     @property
     def best_income(self):
@@ -117,7 +119,7 @@ class SharedMemory:
             "average_income": total_income_sum / simulation_index_since_last_thing_sum,
             "time_elapsed": elapsed_time.total_seconds(),
             "simulations_per_second": simulation_index_sum / elapsed_time.total_seconds(),
-            "simulation_time": elapsed_time.total_seconds() / simulation_index_sum,
+            "simulation_time": elapsed_time.total_seconds() / simulation_index_sum * self._thread_count,
             "current_income": ThingMaker.current_income(self.things)
         }
 

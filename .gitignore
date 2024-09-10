@@ -2,3 +2,6 @@
 .idea/*
 resource/shared/*
 resource/save/*
+*/__pycache__/*
+__pycache__/*
+*/*/__pycache__/*
