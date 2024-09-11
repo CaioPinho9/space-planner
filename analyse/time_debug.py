@@ -9,14 +9,20 @@ class TimeDebug:
     __end_time = {}
 
     @classmethod
-    def start(cls, key):
+    def start(cls, process_id, key):
+        if process_id != 0:
+            return
+
         if key not in cls.__start_time:
             cls.__start_time[key] = []
 
         cls.__start_time[key].append(time.time())
 
     @classmethod
-    def end(cls, key):
+    def end(cls, process_id, key):
+        if process_id != 0:
+            return
+
         if key not in cls.__end_time:
             cls.__end_time[key] = []
 
