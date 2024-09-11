@@ -1,7 +1,7 @@
-start took 9.973526000976562 ms
-reset_simulation_things took 49.87978935241699 ms
-current_income took 0.11515617370605469 ms
-calculate_normalized_efficiencies took 54.761648178100586 ms
-normalized_efficiencies took 0.8416175842285156 ms
-choices took 24.765968322753906 ms
-buy took 17.236709594726562 ms
+start: 9.97ms
+reset_simulation_things: 49.87ms
+current_income: 0.11ms
+calculate_normalized_efficiencies: 54.76ms
+normalized_efficiencies: 0.84ms
+choices: 24.76ms
+buy: 17.23ms

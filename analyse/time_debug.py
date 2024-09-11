@@ -41,6 +41,6 @@ class TimeDebug:
             for i in range(len(start_list)):
                 avg_time += ((end_list[i]) - start_list[i]) * 1000
 
-            print(f'{key} took {avg_time} ms')
+            print(f'{key}: {avg_time:.2f}ms')
             with open(cls.__DEBUG_TIME_TXT, 'a') as f:
                 f.write(f'{key} took {avg_time} ms\n')
