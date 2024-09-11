@@ -135,6 +135,9 @@ class Simulation:
                         if income_per_second > self.shared_memory.best_income:
                             self.shared_memory.best_income = income_per_second
                             self.shared_memory.best_index = simulation_index
+                            if len(current_log) > 10:
+                                current_log = current_log.head(10)
+
                             self.shared_memory.best_log = current_log.to_dict(orient='records')
 
                 count += 1
