@@ -2,8 +2,8 @@ from data.things.thing import Thing
 
 
 class Upgrade(Thing):
-    def __init__(self, name, target, multiplier, cost, quantity=0):
-        super().__init__(name, cost, quantity, multiplier)
+    def __init__(self, name, target, multiplier, cost):
+        super().__init__(name, cost, multiplier)
         self._multiplier = multiplier
         self._target = target
         self._target_obj = None

@@ -1,6 +1,7 @@
 import multiprocessing
 import pickle
 from datetime import datetime
+from turtledemo.forest import start
 
 from managers.thing_maker import ThingMaker
 
@@ -29,10 +30,10 @@ class SharedMemory:
 
         self.things = []
 
-    def increase_simulation(self, thread_id, income, multiplier):
-        self._simulation_index[thread_id] += multiplier
-        self._simulation_index_since_last_thing[thread_id] += multiplier
-        self._total_income[thread_id] += income * multiplier
+    def increase_simulation(self, thread_id, income):
+        self._simulation_index[thread_id] += 1
+        self._simulation_index_since_last_thing[thread_id] += 1
+        self._total_income[thread_id] += income
 
     @property
     def best_income(self):

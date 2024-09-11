@@ -139,8 +139,7 @@ class Simulation:
 
                 count += 1
 
-                if count % 50 == 0:
-                    self.shared_memory.increase_simulation(process_id, income_per_second, 50)
+                self.shared_memory.increase_simulation(process_id, income_per_second)
             except TypeError as e:
                 continue
 

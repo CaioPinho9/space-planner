@@ -3,8 +3,8 @@ from data.things.thing import Thing
 
 
 class PotatoType(Thing):
-    def __init__(self, name, power_output, quantity=0):
-        super().__init__(name, Predictor.predict_thing_cost(quantity + 1, name), quantity, 1)
+    def __init__(self, name, power_output):
+        super().__init__(name, Predictor.predict_thing_cost(1, name), 1)
         self.base_power_output = power_output
         self._power_output = self.base_power_output
         self._efficiency = self._power_output / self.current_cost
@@ -19,6 +19,7 @@ class PotatoType(Thing):
 
     def buy(self):
         self.quantity += 1
+        return self._buff
 
     @property
     def multiplier(self):

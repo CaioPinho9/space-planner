@@ -1,3 +1,4 @@
+from data.things.potato_plant import PotatoPlant
 from data.things.potato_types import PotatoType
 from data.things.probetato import Probetato
 from data.things.upgrade import Upgrade
@@ -13,7 +14,7 @@ class ThingMakerStarter:
             PotatoType("Potato", power_output=1.0),
             Probetato("Probetato", power_output=8.0),
             PotatoType("Spudnik", power_output=42.0),
-            PotatoType("PotatoPlant", power_output=230),
+            PotatoPlant("PotatoPlant", power_output=230),
         ]
 
         upgrades = [

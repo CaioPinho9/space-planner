@@ -39,8 +39,6 @@ class ThingMaker:
         for thing in self.shared_memory.things:
             things_json.update(thing.serialize())
 
-        things_json['start_income'] = ThingMaker.current_income(self.shared_memory.things)
-
         with open(self._save_file, 'w') as f:
             json.dump(things_json, f, indent=4)
 
@@ -53,7 +51,6 @@ class ThingMaker:
             for thing in temp:
                 thing.quantity = things_json.get(thing.name, 0)
             self.shared_memory.things = temp
-            self.start_income = things_json.get('start_income', 0)
         except FileNotFoundError:
             pass
 

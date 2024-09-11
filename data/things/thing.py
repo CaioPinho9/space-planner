@@ -2,13 +2,14 @@ from abc import abstractmethod, ABC
 
 
 class Thing(ABC):
-    def __init__(self, name, cost, quantity, multiplier):
+    def __init__(self, name, cost, multiplier):
         self.name = name
         self.current_cost = cost
         self._efficiency = 0
 
         self._multiplier = multiplier
-        self._quantity = quantity
+        self._quantity = 0
+        self._buff = None
 
     @abstractmethod
     def buy(self):
