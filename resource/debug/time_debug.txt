@@ -1,7 +1,9 @@
-start: 9.97ms
-reset_simulation_things: 49.87ms
-current_income: 0.11ms
-calculate_normalized_efficiencies: 54.76ms
-normalized_efficiencies: 0.84ms
-choices: 24.76ms
-buy: 17.23ms
+start: 4.66ms
+reset_simulation_things: 9.08ms
+current_income: 11.12ms
+calculate_normalized_efficiencies: 12.95ms
+normalized_efficiencies: 15.31ms
+choices: 17.24ms
+buy: 19.15ms
+log: 21.79ms
+increase_simulation: 23.87ms

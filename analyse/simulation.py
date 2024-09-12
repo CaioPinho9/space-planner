@@ -5,7 +5,6 @@ from random import choices
 
 import pandas as pd
 
-from analyse.time_debug import TimeDebug
 from data.shared_memory import SharedMemory
 from managers.buff_manager import BuffManager
 from managers.thing_maker import ThingMaker
@@ -72,32 +71,24 @@ class Simulation:
         count = 0
         while True:
             try:
-                TimeDebug.start(process_id, "start")
                 simulation_index = self.shared_memory.simulation_index[process_id]
                 current_log = pd.DataFrame(columns=["Time", "Income", "Thing", "Cost", "Quantity"])
-                TimeDebug.end(process_id, "start")
 
-                TimeDebug.start(process_id, "reset_simulation_things")
                 simulation_things = self.thing_maker.reset_simulation_things()
-                TimeDebug.end(process_id, "reset_simulation_things")
 
                 if simulation_things is None:
                     continue
 
                 buff_manager = BuffManager()
 
-                TimeDebug.start(process_id, "current_income")
                 income_per_second = ThingMaker.current_income(simulation_things)
-                TimeDebug.end(process_id, "current_income")
 
                 if income_per_second == 0:
                     income_per_second = 0.1
 
                 current_w = 0
                 # Calculate total efficiency
-                TimeDebug.start(process_id, "calculate_normalized_efficiencies")
                 normalized_efficiencies = self._calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
-                TimeDebug.end(process_id, "calculate_normalized_efficiencies")
                 last_bought = False
 
                 for t in range(self.time_steps):
@@ -105,26 +96,19 @@ class Simulation:
                     income_per_second += buff_manager.use()
 
                     if last_bought:
-                        TimeDebug.start(process_id, "calculate_normalized_efficiencies")
                         normalized_efficiencies = self._calculate_normalized_efficiencies(simulation_things, income_per_second, self.time_steps)
-                        TimeDebug.end(process_id, "calculate_normalized_efficiencies")
                     else:
-                        TimeDebug.start(process_id, "normalized_efficiencies")
                         normalized_efficiencies = [
                             0 if upgrade.current_cost <= current_w - income_per_second else efficiency
                             for upgrade, efficiency in zip(simulation_things, normalized_efficiencies)
                         ]
-                        TimeDebug.end(process_id, "normalized_efficiencies")
 
                     # Decide what to buy based on normalized efficiencies
-                    TimeDebug.start(process_id, "choices")
                     selected_obj = choices(simulation_things, weights=normalized_efficiencies, k=1)[0]
-                    TimeDebug.end(process_id, "choices")
 
                     if selected_obj.current_cost <= current_w:
                         last_bought = False
                         if selected_obj.buyable:
-                            TimeDebug.start(process_id, "buy")
                             quantity = selected_obj.quantity
                             cost = selected_obj.current_cost
                             current_w -= cost
@@ -135,10 +119,8 @@ class Simulation:
                             buff = selected_obj.buy()
 
                             income_per_second += buff_manager.add_buff(buff)
-                            TimeDebug.end(process_id, "buy")
 
                             # Log the event
-                            TimeDebug.start(process_id, "log")
                             with warnings.catch_warnings():
                                 warnings.simplefilter(action='ignore', category=FutureWarning)
                                 current_log = pd.concat([current_log, pd.DataFrame([{
@@ -148,22 +130,17 @@ class Simulation:
                                     "Cost": cost,
                                     "Quantity": quantity
                                 }])], ignore_index=True)
-                            TimeDebug.end(process_id, "log")
 
                 if income_per_second > self.shared_memory.best_income:
                     with self.lock:
                         if income_per_second > self.shared_memory.best_income:
-                            TimeDebug.start(process_id, "best_log")
                             self.shared_memory.best_income = income_per_second
                             self.shared_memory.best_index = simulation_index
                             self.shared_memory.best_log = current_log.to_dict(orient='records')
-                            TimeDebug.end(process_id, "best_log")
 
                 count += 1
 
-                TimeDebug.start(process_id, "increase_simulation")
                 self.shared_memory.increase_simulation(process_id, income_per_second)
-                TimeDebug.end(process_id, "increase_simulation")
             except TypeError as e:
                 continue
 
