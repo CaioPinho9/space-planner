@@ -126,6 +126,7 @@ class Predictor:
         # Read the parameters from the CSV file
         df = cls.get_predict_parameters()
 
+        # TODO: fix this after adding value
         # Iterate over each row in the dataframe
         for _, row in df.iterrows():
             if row['Column'] != thing:
@@ -153,6 +154,15 @@ class Predictor:
             json.dump(json_data, file, indent=2)
 
         Predictor.generate_parameters()
+
+    @classmethod
+    def get_thing_price(cls):
+        with open(cls.json_file_path, 'r') as file:
+            json_data = json.load(file)
+
+        json_data['columns'] = list(json_data.keys())
+
+        return json_data
 
 
 if __name__ == '__main__':

@@ -45,6 +45,11 @@ def get_simulation():
     return jsonify(simulation.get_simulation_results().to_dict())
 
 
+@flask_app.route('/simulation/reset', methods=['GET'])
+def reset_simulation():
+    simulation.reset_simulation()
+    return jsonify({"message": "Simulation reset"})
+
 @flask_app.route('/thing_maker/buy/<thing_name>', methods=['GET'])
 def buy_thing(thing_name):
     if thing_name is None:
@@ -65,6 +70,10 @@ def get_buyable_things():
 def predict_price(thing_name, price):
     Predictor.add_price_evolution(thing_name, price)
     return jsonify("Price added")
+
+@flask_app.route('/predictor/thing_price', methods=['GET'])
+def get_thing_price():
+    return jsonify(Predictor.get_thing_price())
 
 
 if __name__ == '__main__':

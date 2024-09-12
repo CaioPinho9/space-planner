@@ -12,7 +12,7 @@ class SpacePlanner(tk.Tk):
         self.running_simulation = False
 
         self.title("Space Planner")
-        self.geometry("675x500")
+        self.geometry("675x525")
 
         # Table columns
         self.columns = ["Time", "Income", "Thing", "Cost", "Quantity"]
@@ -74,8 +74,11 @@ class SpacePlanner(tk.Tk):
         self.save_button = tk.Button(self, text="Save Simulation", command=self.save_simulation)
         self.save_button.grid(row=12, column=0, columnspan=2, sticky="ew")
 
+        self.save_button = tk.Button(self, text="Reset Simulation", command=self.reset_simulation)
+        self.save_button.grid(row=13, column=0, columnspan=2, sticky="ew")
+
         self.view_prices_button = tk.Button(self, text="View Prices", command=self.show_price_modal)
-        self.view_prices_button.grid(row=13, column=0, columnspan=2, sticky="ew")
+        self.view_prices_button.grid(row=14, column=0, columnspan=2, sticky="ew")
 
     def update_simulation_results(self):
         try:
@@ -222,6 +225,22 @@ class SpacePlanner(tk.Tk):
         except RequestException as e:
             print(f"Request failed: {e}")
 
+    @staticmethod
+    def reset_simulation():
+        try:
+            response = requests.get(host + '/simulation/reset')
+            response.raise_for_status()  # Raise exception for 4XX/5XX errors
+
+            if response.status_code == 200:
+                print("Simulation reset successfully!")
+            else:
+                print("Failed to reset simulation.")
+
+        except (ConnectionError, Timeout) as e:
+            print(f"Error: {e}. Could not connect to the server.")
+        except RequestException as e:
+            print(f"Request failed: {e}")
+
     def show_price_modal(self):
         # Modal window setup
         modal = tk.Toplevel(self)
@@ -229,16 +248,12 @@ class SpacePlanner(tk.Tk):
         modal.geometry("600x400")
 
         # Sample data
-        price_data = {
-            "SolarPanel": [17, 20, 23, 26, 30, 34, 39, 45, 52, 60, 69, 79, 91, 105, 121, 139, 160, 184],
-            "Potato": [120, 138, 159, 183, 210, 241, 277, 319, 367, 422, 485],
-            "Probetato": [680, 782, 899, 1034, 1189, 1367, 1572, 1808, 2079, 2391, 2750],
-            "Spudnik": [13700, 15755, 18118, 20836, 23961, 27555, 31688, 36441, 41907, 48193, 55422],
-            "PotatoPlant": [284000]
-        }
+        price_data = self.get_thing_price()
+        columns = price_data['columns']
+        sorted_data = {col: price_data[col] for col in columns if col in price_data}
+        price_data.pop('columns', None)
 
         # Treeview for the modal table
-        columns = list(price_data.keys())
         tree = ttk.Treeview(modal, columns=columns, show="headings")
 
         for col in columns:
@@ -246,15 +261,15 @@ class SpacePlanner(tk.Tk):
             tree.column(col, width=100)
 
         # Insert the data into the table
-        max_length = max(len(lst) for lst in price_data.values())
+        max_length = max(len(lst) for lst in sorted_data.values())
         for i in range(max_length):
-            values = [price_data[col][i] if i < len(price_data[col]) else "" for col in columns]
+            values = [sorted_data[col][i] if i < len(sorted_data[col]) else "" for col in columns]
             tree.insert("", "end", values=values)
 
         tree.pack(fill=tk.BOTH, expand=True)
 
         # Add new value button
-        add_button = tk.Button(modal, text="Add New Value", command=lambda: self.add_new_price(modal, tree, price_data))
+        add_button = tk.Button(modal, text="Add New Value", command=lambda: self.add_new_price(modal, tree, sorted_data))
         add_button.pack()
 
     def add_new_price(self, modal, tree, price_data):
@@ -262,11 +277,11 @@ class SpacePlanner(tk.Tk):
         thing_name = simpledialog.askstring("Input", "Enter thing name (e.g., SolarPanel):", parent=modal)
         new_price = simpledialog.askfloat("Input", f"Enter new price for {thing_name}:", parent=modal)
 
+        sorted_data = price_data
+
         if thing_name and new_price is not None:
             # Update the price_data with new value
             if thing_name in price_data:
-                price_data[thing_name].append(new_price)
-
                 # Send the new value to the server
                 try:
                     response = requests.get(f'{host}/predictor/thing_price/{thing_name}/{int(new_price)}')
@@ -274,6 +289,10 @@ class SpacePlanner(tk.Tk):
 
                     if response.status_code == 200:
                         print(f"New price {new_price} added to {thing_name} successfully!")
+                        price_data = self.get_thing_price()
+                        columns = price_data['columns']
+                        sorted_data = {col: price_data[col] for col in columns if col in price_data}
+                        price_data.pop('columns', None)
                     else:
                         print(f"Failed to add new price to {thing_name}.")
 
@@ -283,7 +302,7 @@ class SpacePlanner(tk.Tk):
                     print(f"Request failed: {e}")
 
                 # Refresh the treeview
-                self.refresh_price_table(tree, price_data)
+                self.refresh_price_table(tree, sorted_data)
 
     @staticmethod
     def refresh_price_table(tree, price_data):
@@ -295,6 +314,23 @@ class SpacePlanner(tk.Tk):
         for i in range(max_length):
             values = [price_data[col][i] if i < len(price_data[col]) else "" for col in price_data.keys()]
             tree.insert("", "end", values=values)
+
+    @staticmethod
+    def get_thing_price():
+        try:
+            response = requests.get(host + '/predictor/thing_price')
+            response.raise_for_status()  # Raise exception for 4XX/5XX errors
+
+            if response.status_code == 200:
+                print("Predictor get successfully!")
+                return response.json()
+            else:
+                print("Failed to get predictor.")
+
+        except (ConnectionError, Timeout) as e:
+            print(f"Error: {e}. Could not connect to the server.")
+        except RequestException as e:
+            print(f"Request failed: {e}")
 
 
 def run_tkinter():

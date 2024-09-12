@@ -150,5 +150,13 @@ class Simulation:
     def get_simulation_results(self):
         return self.shared_memory
 
+    def reset_simulation(self):
+        if self.running_simulation:
+            return False
+
+        self.shared_memory.things = []
+        self.thing_maker_starter.start()
+        self.thing_maker.save_thing_maker()
+
     def buy_thing(self):
         self.shared_memory.reset_buy()

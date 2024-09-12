@@ -18,6 +18,6 @@ class Probetato(PotatoType):
 
     def _update_quantity(self):
         self.current_cost = Predictor.predict_thing_cost(self._quantity + 1, self.name)
-        if self._quantity == 4:
+        if self._quantity == 3:
             self.current_cost += 550
         self._efficiency = self._probetato_efficiency()
