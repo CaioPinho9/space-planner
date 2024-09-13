@@ -16,6 +16,10 @@ class Probetato(PotatoType):
     def power_output(self):
         return self._power_output if self.quantity >= 3 else 0
 
+    @power_output.setter
+    def power_output(self, value):
+        self._power_output = value
+
     def _update_quantity(self):
         self.current_cost = Predictor.predict_thing_cost(self._quantity + 1, self.name)
         if self._quantity == 3:

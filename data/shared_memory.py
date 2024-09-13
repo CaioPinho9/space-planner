@@ -1,8 +1,8 @@
 import multiprocessing
 import pickle
 from datetime import datetime
-from turtledemo.forest import start
 
+from data.things.upgrade import Upgrade
 from managers.thing_maker import ThingMaker
 
 
@@ -52,7 +52,13 @@ class SharedMemory:
         # read from file
         try:
             with open(self._shared_memory_file, "rb") as f:
-                return pickle.load(f)
+                things = pickle.load(f)
+                for thing in things:
+                    if isinstance(thing, Upgrade):
+                        thing.thing_maker.shared_memory = self
+                        thing.thing_maker.simulation_things = things
+
+                return things
         except FileNotFoundError:
             return []
 

@@ -35,9 +35,7 @@ class Upgrade(Thing):
 
     @property
     def efficiency(self):
-        thing = self._find_target()
-        self._efficiency = (thing.power_output * self._multiplier) / self.current_cost
-        return self._efficiency
+        return self.power_output / self.current_cost
 
     @property
     def power_output(self):
@@ -47,3 +45,7 @@ class Upgrade(Thing):
     @property
     def buyable(self):
         return not self._quantity
+
+    @property
+    def thing_maker(self):
+        return self._thing_maker

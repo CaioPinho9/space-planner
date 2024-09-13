@@ -18,7 +18,7 @@ class ThingMakerStarter:
         ]
 
         upgrades = [
-            Upgrade("CleanSolarPanels", target="SolarPanel", multiplier=0.3 / 0.1, cost=1000),
+            Upgrade("CleanSolarPanels", target="SolarPanel", multiplier=0.3 / 0.1, cost=140),
             Upgrade("SolarAmbience", target="SolarPanel", multiplier=0.0942 / 0.0885, cost=2600),
             Upgrade("MarisPipers", target="Potato", multiplier=2, cost=8000),
             Upgrade("PolishedSolarPanels", target="SolarPanel", multiplier=1 / 0.3, cost=15000),

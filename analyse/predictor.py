@@ -118,6 +118,10 @@ class Predictor:
     def get_predict_parameters(cls):
         if cls._predict_parameters is None:
             cls._predict_parameters = pd.read_csv(cls._predict_parameters_file_name)
+
+            if isinstance(cls._predict_parameters, dict):
+                cls._predict_parameters = pd.DataFrame(cls._predict_parameters)
+
         return cls._predict_parameters
 
     # Method to read parameters and make predictions
@@ -126,7 +130,10 @@ class Predictor:
         # Read the parameters from the CSV file
         df = cls.get_predict_parameters()
 
-        # TODO: fix this after adding value
+        if isinstance(df, dict):
+            cls._predict_parameters = pd.DataFrame(df)
+            df = cls._predict_parameters
+
         # Iterate over each row in the dataframe
         for _, row in df.iterrows():
             if row['Column'] != thing:

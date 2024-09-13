@@ -60,6 +60,8 @@ class ThingMaker:
     def current_income(things):
         total = 0
         for thing in things:
+            if type(thing).__name__ == 'Upgrade':
+                continue
             if thing.name == 'Probetato':
                 total -= thing.power_output * min(thing.quantity, 3)
             total += thing.power_output * thing.quantity
