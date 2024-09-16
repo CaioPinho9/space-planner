@@ -20,13 +20,15 @@ class ThingMakerStarter:
         upgrades = [
             Upgrade("CleanSolarPanels", target="SolarPanel", multiplier=0.3 / 0.1, cost=140),
             Upgrade("SolarAmbience", target="SolarPanel", multiplier=0.0942 / 0.0885, cost=2600),
-            Upgrade("MarisPipers", target="Potato", multiplier=2, cost=8000),
+            Upgrade("MarisPipers", target="Potato", multiplier=3, cost=8000),
             Upgrade("PolishedSolarPanels", target="SolarPanel", multiplier=1 / 0.3, cost=15000),
             Upgrade("MarisPeers", target="Potato", multiplier=2, cost=160000),
             Upgrade("ProbetatoRoots", target="Probetato", multiplier=4, cost=180000),
             Upgrade("GoldenSolarPanels", target="SolarPanel", multiplier=4, cost=500000),
             Upgrade("GoldenSpudnikFoil", target="Spudnik", multiplier=2, cost=600000),
             Upgrade("ProbetatoPlanters", target="Probetato", multiplier=2, cost=1800000),
+            Upgrade("PotatoPlantRoots", target="PotatoPlant", multiplier=3, cost=3000000),
+            Upgrade("GrapheneSpudnikWraps", target="Spudnik", multiplier=2, cost=5400000),
         ]
 
         for upgrade in upgrades:

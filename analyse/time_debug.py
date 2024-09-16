@@ -7,10 +7,14 @@ class TimeDebug:
 
     __start_time = {}
     __end_time = {}
+    __multiprocessing_pid = -1
 
     @classmethod
-    def start(cls, process_id, key):
-        if process_id != 0:
+    def start(cls, pid, key):
+        if cls.__multiprocessing_pid == -1:
+            cls.__multiprocessing_pid = pid
+
+        if pid != cls.__multiprocessing_pid:
             return
 
         if key not in cls.__start_time:
@@ -19,8 +23,8 @@ class TimeDebug:
         cls.__start_time[key].append(time.time())
 
     @classmethod
-    def end(cls, process_id, key):
-        if process_id != 0:
+    def end(cls, pid, key):
+        if pid != cls.__multiprocessing_pid:
             return
 
         if key not in cls.__end_time:

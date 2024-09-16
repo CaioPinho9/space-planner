@@ -77,6 +77,7 @@ class Simulation:
                 simulation_things = self.thing_maker.reset_simulation_things()
 
                 if simulation_things is None:
+                    print("Simulation things is None")
                     continue
 
                 buff_manager = BuffManager()
@@ -142,6 +143,7 @@ class Simulation:
 
                 self.shared_memory.increase_simulation(process_id, income_per_second)
             except TypeError as e:
+                print(e)
                 continue
 
     def save_simulation(self):

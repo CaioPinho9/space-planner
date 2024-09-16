@@ -12,10 +12,6 @@ class ThingMaker:
 
     @property
     def simulation_things(self):
-        if not self._simulation_things:
-            for thing in self.shared_memory.things:
-                thing.set_injection(self)
-            return self.reset_simulation_things()
         return self._simulation_things
 
     @simulation_things.setter
