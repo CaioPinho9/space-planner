@@ -1,5 +1,5 @@
+import multiprocessing
 import time
-
 
 
 class TimeDebug:
@@ -7,44 +7,45 @@ class TimeDebug:
 
     __start_time = {}
     __end_time = {}
-    __multiprocessing_pid = -1
+    __mean_time = {}
+    __current_iteration = {}
+    __multiprocessing_pid = multiprocessing.Value('i', -10)
 
     @classmethod
-    def start(cls, pid, key):
-        if cls.__multiprocessing_pid == -1:
-            cls.__multiprocessing_pid = pid
+    def start(cls, key):
+        pid = multiprocessing.current_process().pid
+        if cls.__multiprocessing_pid.value <= -2:
+            cls.__multiprocessing_pid.value += 1
+        elif cls.__multiprocessing_pid.value == -1:
+            with multiprocessing.Lock():
+                if cls.__multiprocessing_pid.value == -1:
+                    cls.__multiprocessing_pid.value = pid
 
-        if pid != cls.__multiprocessing_pid:
+        if pid != cls.__multiprocessing_pid.value:
             return
 
-        if key not in cls.__start_time:
-            cls.__start_time[key] = []
-
-        cls.__start_time[key].append(time.time())
+        cls.__start_time[key] = time.time()
 
     @classmethod
-    def end(cls, pid, key):
-        if pid != cls.__multiprocessing_pid:
+    def end(cls, key):
+        pid = multiprocessing.current_process().pid
+        if pid != cls.__multiprocessing_pid.value:
             return
 
-        if key not in cls.__end_time:
-            cls.__end_time[key] = []
+        cls.__end_time[key] = time.time()
 
-        cls.__end_time[key].append(time.time())
+        mean_time = (cls.__end_time[key] - cls.__start_time[key]) * 1000
 
-        if len(cls.__start_time[key]) != len(cls.__end_time[key]):
-            raise Exception(f'Key {key} has different start and end times')
+        if key not in cls.__mean_time:
+            cls.__mean_time[key] = 0
+            cls.__current_iteration[key] = 0
 
-        avg_time_list = []
-        for key in cls.__start_time:
-            avg_time = 0
-            start_list = cls.__start_time[key]
-            end_list = cls.__end_time[key]
-            for i in range(len(start_list)):
-                avg_time += ((end_list[i]) - start_list[i]) * 1000
-                avg_time_list.append(avg_time)
+        cls.__mean_time[key] = (cls.__mean_time[key] * cls.__current_iteration[key] + mean_time) / (cls.__current_iteration[key] + 1)
 
-        text = [f'{key}: {avg_time:.2f}ms' for key, avg_time in zip(cls.__start_time, avg_time_list)]
+        cls.__current_iteration[key] += 1
+
+        text = [f'{key}: {mean_time:.5f}ms' for key, mean_time in cls.__mean_time.items()]
         text = '\n'.join(text)
+
         with open(cls.__DEBUG_TIME_TXT, 'w') as f:
             f.write(text)

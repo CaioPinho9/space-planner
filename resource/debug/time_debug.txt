@@ -1,9 +1,18 @@
-start: 4.66ms
-reset_simulation_things: 9.08ms
-current_income: 11.12ms
-calculate_normalized_efficiencies: 12.95ms
-normalized_efficiencies: 15.31ms
-choices: 17.24ms
-buy: 19.15ms
-log: 21.79ms
-increase_simulation: 23.87ms
+things: 38.70924ms #TODO
+deepcopy: 9.03514ms
+reset_simulation_things: 48.49381ms
+current_income: 0.08560ms
+calculate_normalized_efficiencies: 0.26514ms
+buff_use: 0.02563ms
+efficiencies: 0.50168ms
+choices: 0.05089ms
+buy?: 0.28734ms
+current_cost: 0.01721ms
+power_output: 0.02269ms
+buy: 1.18517ms
+add_buff: 0.02652ms
+log: 4.31221ms
+time_steps: 1738.76566ms
+best_income: 0.81480ms
+increase_simulation: 2.88724ms #TODO
+simulation_index: 0.54992ms

@@ -1,6 +1,8 @@
 import json
 from copy import deepcopy
 
+from analyse.time_debug import TimeDebug
+
 
 class ThingMaker:
     start_income = None
@@ -26,7 +28,13 @@ class ThingMaker:
 
     def reset_simulation_things(self):
         try:
-            return deepcopy(self.shared_memory.things)
+            TimeDebug.start('things')
+            things = self.shared_memory.things
+            TimeDebug.end('things')
+            TimeDebug.start('deepcopy')
+            copy = deepcopy(things)
+            TimeDebug.end('deepcopy')
+            return copy
         except Exception:
             return None
 
