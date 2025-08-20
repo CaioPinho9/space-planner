@@ -28,12 +28,12 @@ class ThingMaker:
 
     def reset_simulation_things(self):
         try:
-            TimeDebug.start('things')
+            # TimeDebug.start('things')
             things = self.shared_memory.things
-            TimeDebug.end('things')
-            TimeDebug.start('deepcopy')
+#             TimeDebug.end('things')
+#             TimeDebug.start('deepcopy')
             copy = deepcopy(things)
-            TimeDebug.end('deepcopy')
+#             TimeDebug.end('deepcopy')
             return copy
         except Exception:
             return None

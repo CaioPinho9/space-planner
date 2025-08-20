@@ -1,18 +1,18 @@
-things: 38.70924ms #TODO
-deepcopy: 9.03514ms
-reset_simulation_things: 48.49381ms
-current_income: 0.08560ms
-calculate_normalized_efficiencies: 0.26514ms
-buff_use: 0.02563ms
-efficiencies: 0.50168ms
-choices: 0.05089ms
-buy?: 0.28734ms
-current_cost: 0.01721ms
-power_output: 0.02269ms
-buy: 1.18517ms
-add_buff: 0.02652ms
-log: 4.31221ms
-time_steps: 1738.76566ms
-best_income: 0.81480ms
-increase_simulation: 2.88724ms #TODO
-simulation_index: 0.54992ms
+simulation_index: 2.41854ms
+things: 82.63562ms
+deepcopy: 17.78302ms
+reset_simulation_things: 102.84413ms
+current_income: 0.38532ms
+calculate_normalized_efficiencies: 0.55212ms
+buff_use: 0.03721ms
+efficiencies: 0.89425ms
+choices: 0.08183ms
+buy?: 0.43857ms
+current_cost: 0.02807ms
+power_output: 0.03705ms
+buy: 1.90786ms
+add_buff: 0.03132ms
+log: 6.46710ms
+time_steps: 2804.72662ms
+best_income: 1.28414ms
+increase_simulation: 4.88921ms
